@@ -1,0 +1,39 @@
+.lstItem{
+  border: #777777 solid 1px;
+  padding: 5px;
+  margin: 5px;
+  display:  inline-flex;
+  width: 80%;
+}
+label{
+  width: 19%;
+  margin-right: -52px;
+}
+.team{
+  display: flex;
+}
+.btn-footer{
+  text-align: center;
+  padding: 21px;
+}
+/*.rowChecked{*/
+  /*width: 20px;*/
+/*}*/
+.checkBox{
+  width: 20px !important;
+}
+.projectItem{
+  height: 100px;
+}
+.userItem{
+  height: 120px;
+  margin: 10px;
+}
+.temaName{
+
+  margin-top: 10px;
+
+}
+.err{
+  color: red;
+}

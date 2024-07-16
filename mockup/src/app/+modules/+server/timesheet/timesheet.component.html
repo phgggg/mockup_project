@@ -1,0 +1,177 @@
+<div class="title">
+  <h4>TimeSheet</h4>
+</div>
+<button type="button" class="btn btn-success" (click)="openModalEditOrAdd(template)">Báo cáo</button>
+
+<table class="table table-bordered table-striped" *ngIf="role != 'MANAGER'">
+  <thead>
+  <tr>
+    <th>Task</th>
+    <th>note</th>
+    <th>Created Date</th>
+    <th>Result</th>
+    <th>status</th>
+  </tr>
+  </thead>
+  <tbody *ngIf="teamsheet$">
+  <tr *ngFor="let t of teamsheet$.listData">
+    <td>{{ t.task }}</td>
+    <td>{{ t.note }}</td>
+    <td>{{ t.createdDate | date: 'dd-MM-yyyy' }}</td>
+    <td>{{ t.result}}</td>
+    <td *ngIf="t.status ===0 "><div class="table-secondary">Đang chờ</div></td>
+    <td *ngIf="t.status ===1 ">Đã Duyệt</td>
+    <td *ngIf="t.status ===2 ">Từ chối</td>
+  </tr>
+  <!--<div class="row">-->
+    <!--<div class="col-xs-12 col-12">-->
+      <!--<pagination-->
+        <!--[itemsPerPage]="itemsPerPage"-->
+        <!--[directionLinks]="false"-->
+        <!--[totalItems]="totalItems"-->
+        <!--[(ngModel)]="currentPage"-->
+        <!--(numPages)="smallnumPages = $event">-->
+      <!--</pagination>-->
+    <!--</div>-->
+
+    <!--<div class="col-xs-12 col-12">-->
+      <!--<pager-->
+        <!--[totalItems]="totalItems"-->
+        <!--[(ngModel)]="currentPage"-->
+        <!--(pageChanged)="pageChanged($event)"-->
+        <!--pageBtnClass="btn"-->
+        <!--[itemsPerPage]="itemsPerPage"-->
+        <!--class="pull-left">-->
+      <!--</pager>-->
+    <!--</div>-->
+  <!--</div>-->
+  <div class="col-12 justify-content-center mb-5">
+    <ngb-pagination [collectionSize]="totalItems" [(page)]="currentPage" (pageChange)="pageChanged(currentPage)"
+                    [boundaryLinks]="true"></ngb-pagination>
+  </div>
+  </tbody>
+</table>
+<table class="table table-bordered table-striped" *ngIf="role === 'MANAGER'">
+  <thead>
+  <tr>
+    <th>Task</th>
+    <th>note</th>
+    <th>Created Date</th>
+    <th>Result</th>
+    <th>status</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody *ngIf="teamsheet$">
+  <tr *ngFor="let t of teamsheet$.listData">
+    <td>{{ t.task }}</td>
+    <td>{{ t.note }}</td>
+    <td>{{ t.createdDate | date: 'dd-MM-yyyy' }}</td>
+    <td>{{ t.result}}</td>
+    <td *ngIf="t.status ===0 "><div class="table-secondary">Đang chờ</div></td>
+    <td *ngIf="t.status ===1 ">Đã Duyệt</td>
+    <td *ngIf="t.status ===2 ">Từ chối</td>
+    <td >  <div class="btn-group" dropdown>
+      <button id="button-basic" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
+              aria-controls="dropdown-basic">
+        Action <span class="caret"></span>
+      </button>
+      <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+          role="menu" aria-labelledby="button-basic">
+        <li role="menuitem"><a class="dropdown-item" (click)="updateStatusTimeSheet(t.timesheetId,1)">Accept</a></li>
+        <li role="menuitem"><a class="dropdown-item" (click)="updateStatusTimeSheet(t.timesheetId,2)">Refuse</a>
+        </li>
+      </ul>
+    </div></td>
+  </tr>
+  <!--<div class="row">-->
+  <!--<div class="col-xs-12 col-12">-->
+  <!--<pagination-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--[directionLinks]="false"-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(numPages)="smallnumPages = $event">-->
+  <!--</pagination>-->
+  <!--</div>-->
+
+  <!--<div class="col-xs-12 col-12">-->
+  <!--<pager-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(pageChanged)="pageChanged($event)"-->
+  <!--pageBtnClass="btn"-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--class="pull-left">-->
+  <!--</pager>-->
+  <!--</div>-->
+  <!--</div>-->
+  <div class="col-12 justify-content-center mb-5">
+    <ngb-pagination [collectionSize]="totalItems" [(page)]="currentPage" (pageChange)="pageChanged(currentPage)"
+                    [boundaryLinks]="true"></ngb-pagination>
+  </div>
+  </tbody>
+
+
+</table>
+  <ng-template #template>
+    <!--<tabset type="pills">-->
+    <!--<tab heading="project">-->
+    <div class="modal-header">
+      <h4 class="modal-title pull-left">{{ title }}</h4>
+      <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <form [formGroup]="timesheetForm" (ngSubmit)="onSubmit()">
+        <div class="Content">
+          <div class="">
+            <label class="">task: </label>
+            <div class="modal-control">
+              <!--<input type="text" formControlName="description">-->
+              <!--<textarea rows="4" cols="50" formControlName="description" placeholder="description" [value]="project.data.description"></textarea>-->
+              <textarea rows="4" cols="50" formControlName="task" placeholder="task *"></textarea>
+              <div *ngIf="submitted && f.task.errors" class="err">
+                <div *ngIf="f.task.errors.required">task is required, bro !!</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="">
+            <label class=""> Note: </label>
+            <div class="modal-control">
+              <!--<input type="text" formControlName="deadline" placeholder="deadline" [value]="project.data.deadline | date: 'dd-MM-yyyy'">-->
+              <textarea rows="4" cols="50" formControlName="note" placeholder="note *"></textarea>
+              <!--<input type="text" formControlName="note" placeholder="note *">-->
+              <div *ngIf="submitted && f.note.errors" class="err">
+                <div *ngIf="f.note.errors.required">note is required, bro !!</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="">
+            <label class="">Result: </label>
+            <div class="modal-control">
+              <!--<input type="text" formControlName="projectName" placeholder="project name" [value]="project.data.projectName">-->
+              <input type="text" formControlName="result" placeholder="result *">
+              <div *ngIf="submitted && f.result.errors" class="err">
+                <div *ngIf="f.result.errors.required">result Name is required, bro !!</div>
+              </div>
+            </div>
+          </div>
+
+
+
+        </div>
+
+        <div class="btn-modal">
+          <div class="btn-footer">
+            <button type="submit" class="btn btn-primary"> OK</button> &nbsp;
+            <button type="submit" class="btn btn-danger" (click)="modalRef.hide()"> Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+

@@ -1,0 +1,35 @@
+<div class="auth-page">
+    <div class="container page">
+        <div class="row">
+
+            <div class="col-md-6 offset-md-3 col-xs-12">
+                <h1 class="text-xs-center">{{ 'login.title' | translate }}</h1>
+                <app-list-errors [errors]="errors"></app-list-errors>
+                <form [formGroup]="authForm" (ngSubmit)="submitForm()">
+                    <fieldset>
+                        <fieldset class="form-group">
+                            <input formControlName="username" placeholder="{{'login.user-name' | translate}}"
+                                   [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
+                                   class="form-control form-control-lg" type="text" autocomplete="off"/>
+                            <div *ngIf="submitted && f.username.errors" class="text-danger">
+                                <div *ngIf="f.username.errors.required">Username is required</div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="form-group">
+                            <input formControlName="password" placeholder="{{'login.password' | translate}}"
+                                   [ngClass]="{ 'is-invalid': submitted && f.password.errors }"
+                                   class="form-control form-control-lg" type="password" autocomplete="off"/>
+                            <div *ngIf="submitted && f.password.errors" class="text-danger">
+                                <div *ngIf="f.password.errors.required">Password is required</div>
+                            </div>
+                        </fieldset>
+                        <button class="btn btn-lg btn-primary pull-xs-right" [disabled]="isSubmitting" type="submit">
+                            {{ 'login.title' | translate }}
+                        </button>
+                    </fieldset>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

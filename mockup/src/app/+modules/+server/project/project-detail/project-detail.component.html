@@ -1,0 +1,70 @@
+<div class="title">
+  <h4>Project Detail </h4>
+</div><hr>
+<div class="project" *ngIf="project">
+  <form class="form-horizontal">
+    <div class="form-group">
+      <label class="control-label col-sm-2">Project Name:</label>
+      <div class="col-sm-10">
+        <span>{{project.projectName}} </span>
+      </div>
+    </div>
+    <hr>
+
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="pwd">Description:</label>
+      <div class="col-sm-10">
+        <span>{{project.description}} </span>
+      </div>
+    </div>
+    <hr>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="pwd">Create Date:</label>
+      <div class="col-sm-10">
+        <span>{{project.createdDate | date : 'dd-MM-yyyy'}} </span>
+      </div>
+    </div>
+    <hr>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="pwd">Deadline:</label>
+      <div class="col-sm-10">
+        <span>{{project.deadline | date : 'dd-MM-yyyy' }} </span>
+      </div>
+    </div>
+    <hr>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="pwd">Create By:</label>
+      <div class="col-sm-10">
+        <span>{{project.createdBy}} </span>
+      </div>
+    </div>
+    <hr>
+    <div class="" *ngFor="let t of project.teams; index as i">
+      <label>Team {{i+1}}: </label>
+      <div class="form-group team">
+        <div class="col-sm-4 itemProject">
+          <label class="control-label col-sm-4">Team Name:</label>
+          <div class="col-sm-10">
+            <span>{{t.teamName}} </span>
+          </div>
+        </div>
+
+        <div class="col-sm-4 itemProject">
+          <label class="control-label col-sm-4">Created Date:</label>
+          <div class="col-sm-10">
+            <span>{{t.createdDate | date :'dd-MM-yyyy'}} </span>
+          </div>
+        </div>
+
+        <div class="col-sm-5 itemProject">
+          <label class="control-label col-sm-4">User Number:</label>
+          <div class="col-sm-4">
+            <span>{{t.quantity}} </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </form>
+</div>

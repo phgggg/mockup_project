@@ -1,0 +1,14 @@
+.form-group{
+  display: flex;
+}
+.team{
+  padding: 10px;
+  margin: 10px;
+  border: #777777 solid 1px;
+}
+.itemProject{
+  display: flex;
+}
+.project{
+  padding: 15px;
+}

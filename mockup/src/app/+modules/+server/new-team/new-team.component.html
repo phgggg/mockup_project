@@ -1,0 +1,169 @@
+<div class="title">
+  <h4>New Team</h4>
+  <hr>
+</div>
+<form [formGroup]="myForm" (ngSubmit)="onSubmit()">
+  <div class="Content">
+
+    <div class="listItem">
+      <button type="button" class="btn btn-success col-sm-2" (click)="openModalDataProject(template)">Select Project +
+      </button>
+      <!--<label class=""> Select Project: </label>-->
+      <div class="lstItem projectItem">
+        <div class="modal-control" *ngIf="project">
+          <div>Name Project: {{project.projectName}}</div>
+        </div>
+        <div class="modal-control" *ngIf="project == null">
+          <div> Select  project</div>
+        </div>
+      </div>
+      <div class="listItem ">
+        <button type="button" class="btn btn-success col-sm-2" (click)="openModalDataProject(userTeamPlate)">Select User
+          +
+        </button>
+        <div class="lstItem ">
+          <div class="modal-control " *ngIf="lstuser != null">
+            <div class="" *ngFor="let u of lstuser ; let i= index;">
+              <h4>User {{i+1}}: </h4>
+              <div class="row"><strong class="col-sm-4">Full Name:</strong> <span class="col-sm-8">{{u.fullName}}</span>
+              </div>
+              <div class="row"><strong class="col-sm-4">Email:</strong> <span class="col-sm-8">{{u.email}}</span></div>
+              <div class="row"><strong class="col-sm-4">Skype Name:</strong> <span
+                class="col-sm-8">{{u.skypeName}}</span></div>
+              <hr>
+            </div>
+            <br>
+          </div>
+
+          <div class="modal-control userItem" *ngIf="lstuser.length === 0">
+            <div>Select User</div>
+          </div>
+          <!--<pre>Form values: {{myForm.value.userId | json}}</pre>-->
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-sm-2">Team Name: </label>
+      <div class="col-sm-10" style="margin-left: 51px">
+        <input class="temaName" type="text" formControlName="teamName" placeholder="Team name" style="width: 96.6%">
+        <div *ngIf="submitted && f.teamName.errors" class="err">
+          <div *ngIf="f.teamName.errors.required">Team Name is required, bro !!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-modal">
+      <div class="btn-footer">
+        <button type="submit" class="btn btn-primary"> OK</button> &nbsp;
+        <button type="submit" class="btn btn-danger"> Cancel</button>
+      </div>
+    </div>
+
+
+    <ng-template #template>
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">{{ title }}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-control" *ngIf="project$">
+          <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+              <th></th>
+              <th>Name Project</th>
+              <th>Description</th>
+              <th>Created Date</th>
+              <th>DeadLine</th>
+              <th>Created By</th>
+              <!--<th>Action</th>-->
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let p of project$">
+              <td class="rowChecked">
+                <!--<div *ngFor="let p of project$"> -->
+                <input type="radio" value="{{p.projectId}}" formControlName="project"
+                       (change)="onChangeProject(p.projectId, $event.target.checked)">
+                <!--{{p.projectName}}-->
+                <!--</div></td>-->
+              <td>{{ p.projectName }}</td>
+              <td>{{ p.description }}</td>
+              <td>{{ p.createdDate | date: 'dd-MM-yyyy' }}</td>
+              <td>{{ p.deadline | date: 'dd-MM-yyyy'}}</td>
+              <td>{{ p.createdBy }}</td>
+              <!--<td>-->
+              <!--</td>-->
+            </tr>
+
+            <div class="col-12 justify-content-center mb-5">
+              <ngb-pagination [collectionSize]="totalItems" [(page)]="currentPage"
+                              (pageChange)="pageChanged(currentPage)"
+                              [boundaryLinks]="true"></ngb-pagination>
+            </div>
+            </tbody>
+          </table>
+        </div>
+        <div class="btn-modal">
+          <div class="btn-footer">
+            <button type="submit" class="btn btn-primary" (click)="onSubmitProject()"> OK</button> &nbsp;
+            <button type="submit" class="btn btn-danger" (click)="modalRef.hide()"> Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </ng-template>
+
+    <ng-template #userTeamPlate>
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">{{ title }}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-control" *ngIf="user$">
+          <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+              <th class="checkBox"></th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Department</th>
+              <!--<th>Created</th>-->
+              <th>Role</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let u of user$">
+              <td class="checkBox">
+                <input type="checkbox" (change)="onChange(u.userId, $event.target.checked)">
+              </td>
+              <td>{{ u.fullName }}</td>
+              <td>{{ u.email}}</td>
+              <td>{{ u.phone}}</td>
+              <td>{{ u.education}}</td>
+              <!--<td>{{ u.  | date: 'dd-MM-yyyy'}}</td>-->
+              <td *ngFor="let r of u.roles">{{ r.name}}</td>
+            </tr>
+            <div class="col-12 justify-content-center mb-5">
+              <ngb-pagination [collectionSize]="totalItems" [(page)]="currentPage"
+                              (pageChange)="pageChanged(currentPage)"
+                              [boundaryLinks]="true"></ngb-pagination>
+            </div>
+            </tbody>
+          </table>
+        </div>
+        <div class="btn-modal">
+          <div class="btn-footer">
+            <button type="submit" class="btn btn-primary" (click)="modalRef.hide()"> OK</button> &nbsp;
+            <button type="submit" class="btn btn-danger" (click)="onSubmitUser()"> Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </ng-template>

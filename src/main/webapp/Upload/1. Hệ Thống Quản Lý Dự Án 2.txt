@@ -1,0 +1,17 @@
+1. Hệ Thống Quản Lý Dự Án
+a. Quản Lý Dự Án:
+
+Mô tả: Phát triển một hệ thống quản lý dự án cho một công ty phần mềm. Hệ thống phải có khả năng quản lý các nhiệm vụ, theo dõi tiến độ, và phân công công việc.
+Yêu cầu:
+Tạo, sửa, xóa dự án.
+Phân công nhiệm vụ cho các thành viên trong nhóm.
+Theo dõi tiến độ dự án.
+Báo cáo tiến độ và hiệu suất làm việc.
+b. Quản Lý Tài Liệu Dự Án:
+
+Mô tả: Xây dựng một ứng dụng quản lý tài liệu dự án. Ứng dụng cần lưu trữ, chia sẻ, và quản lý các tài liệu liên quan đến dự án.
+Yêu cầu:
+Tải lên và lưu trữ tài liệu.
+Quản lý phiên bản tài liệu.
+Chia sẻ tài liệu với các thành viên trong nhóm.
+Tìm kiếm và truy xuất tài liệu nhanh chóng.

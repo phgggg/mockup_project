@@ -1,0 +1,31 @@
+.title{
+  border-bottom: 1px solid #777777;
+  padding: 10px;
+}
+
+.modal-control input{
+  width: 100%;
+}
+textarea{
+  width: 100%;
+}
+.Content > div{
+  padding: 5px 0px;
+}
+.btn-modal .btn-footer{
+  width: auto;
+  text-align: center;
+
+}
+.btn-success{
+  margin: 10px 30px;
+  float: right;
+}
+.err{
+  background: yellowgreen;
+  padding: .5em;
+  display: inline-block;
+  font-size: .9em;
+  color: red;
+  margin-bottom: 10px;
+}

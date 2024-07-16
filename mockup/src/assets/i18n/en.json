@@ -1,0 +1,18 @@
+{
+  "nav-bar": {
+    "title-home": "Home",
+    "title-about": "About us",
+    "login": "Login",
+    "resister": "Resister",
+    "logout": "Logout"
+  },
+  "login": {
+    "title": "Login",
+    "user-name": "User Name",
+    "password": "Password",
+    "error": {
+      "unauthorized": "User name or Password invalid",
+      "err": "System err"
+    }
+  }
+}

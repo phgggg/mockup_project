@@ -1,0 +1,65 @@
+<!--<table class="table table-bordered table-striped">-->
+  <!--<thead>-->
+  <!--<tr>-->
+    <!--<th>Name Project</th>-->
+    <!--<th>Description</th>-->
+    <!--<th>TeamName</th>-->
+    <!--<th>Created Date</th>-->
+    <!--<th>DeadLine</th>-->
+    <!--<th>Created By</th>-->
+    <!--<th>Action</th>-->
+  <!--</tr>-->
+  <!--</thead>-->
+  <!--<tbody *ngIf="project$">-->
+  <!--<tr *ngFor="let p of project$.listData">-->
+    <!--<td>{{ p.projectName }}</td>-->
+    <!--<td>{{ p.description }}</td>-->
+    <!--<td>{{ p.createdDate | date: 'dd-MM-yyyy' }}</td>-->
+    <!--<td>{{ p.deadline | date: 'dd-MM-yyyy'}}</td>-->
+    <!--<td>{{ p.createdBy }}</td>-->
+    <!--<td>-->
+        <!--<span>-->
+            <!--&lt;!&ndash;<a [routerLink]="['/office/project/',  p.projectId]"> <i class="fa fa-pencil"></i> </a>&nbsp;&ndash;&gt;-->
+            <!--<a (click)="openModalEditOrAdd(p.projectId, template)"> <i class="fa fa-pencil"></i> </a>&nbsp;-->
+          <!--<a (click)="openModal(p.projectId)" title="Delete"> <i class="fa fa-trash-o "></i> </a>-->
+          <!--&lt;!&ndash;<a> <i class="fa fa-trash-o "></i> </a>&ndash;&gt;-->
+        <!--</span>-->
+    <!--</td>-->
+  <!--</tr>-->
+
+
+  <!--&lt;!&ndash;<pagination&ndash;&gt;-->
+  <!--&lt;!&ndash;[boundaryLinks]="true"&ndash;&gt;-->
+  <!--&lt;!&ndash;[itemsPerPage]="itemsPerPage"&ndash;&gt;-->
+  <!--&lt;!&ndash;[totalItems]="totalItems"&ndash;&gt;-->
+  <!--&lt;!&ndash;[(ngModel)]="currentPage"&ndash;&gt;-->
+  <!--&lt;!&ndash;(numPages)="smallnumPages = $event"&ndash;&gt;-->
+  <!--&lt;!&ndash;previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">&ndash;&gt;-->
+  <!--&lt;!&ndash;</pagination>&ndash;&gt;-->
+
+
+  <!--<div class="row">-->
+    <!--<div class="col-xs-12 col-12">-->
+      <!--<pagination-->
+        <!--[itemsPerPage]="itemsPerPage"-->
+        <!--[directionLinks]="false"-->
+        <!--[totalItems]="totalItems"-->
+        <!--[(ngModel)]="currentPage"-->
+        <!--(numPages)="smallnumPages = $event">-->
+      <!--</pagination>-->
+    <!--</div>-->
+
+    <!--<div class="col-xs-12 col-12">-->
+      <!--<pager-->
+        <!--[totalItems]="totalItems"-->
+        <!--[(ngModel)]="currentPage"-->
+        <!--(pageChanged)="pageChanged($event)"-->
+        <!--pageBtnClass="btn"-->
+        <!--[itemsPerPage]="itemsPerPage"-->
+        <!--class="pull-left">-->
+      <!--</pager>-->
+    <!--</div>-->
+  <!--</div>-->
+
+  <!--</tbody>-->
+<!--</table>-->

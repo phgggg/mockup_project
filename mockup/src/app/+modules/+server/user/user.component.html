@@ -1,0 +1,111 @@
+<div class="title">
+  <h4>{{title}}</h4>
+</div>
+<button type="button" class="btn btn-success" [routerLink]="['/office/new-team']" routerLinkActive="active">Add +
+</button>
+<table class="table table-bordered table-striped">
+  <thead>
+  <tr>
+    <th>User Name</th>
+    <th>Full Name</th>
+    <th>Email</th>
+    <th>Mobile</th>
+    <th>Department</th>
+    <!--<th>Created</th>-->
+    <!--<th>Status</th>-->
+    <th>Role</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody *ngIf="user$">
+  <tr *ngFor="let u of user$">
+    <td>{{ u.userName }}</td>
+    <td>{{ u.fullName }}</td>
+    <td>{{ u.email}}</td>
+    <td>{{ u.phone}}</td>
+    <td>{{ u.education}}</td>
+    <!--<td>{{ u.  | date: 'dd-MM-yyyy'}}</td>-->
+    <!--<td>{{ u.active}}</td>-->
+    <td *ngFor="let r of u.roles">{{ r.name}}</td>
+    <td>
+      <div class="btn-group" dropdown>
+      <button title="roles" id="button-basic" dropdownToggle type="button" class="btn btn-primary dropdown-toggle"
+              aria-controls="dropdown-basic">
+        <i class="fas fa-user"></i> <span class="caret"></span>
+      </button>
+      <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+          role="menu" aria-labelledby="button-basic">
+        <li role="menuitem"><a class="dropdown-item" (click)="updateRole(u.userId,21)">MEMBER</a></li>
+        <li role="menuitem"><a class="dropdown-item" (click)="updateRole(u.userId,22)">TEAMLEAD</a>
+        <li role="menuitem"><a class="dropdown-item" (click)="updateRole(u.userId,23)">MANAGER</a>
+        <li role="menuitem"><a class="dropdown-item" (click)="updateRole(u.userId,24)">HR</a>
+        </li>
+      </ul>
+    </div>
+      &nbsp;
+        <span>
+            <!--<a [routerLink]="['/office/project/',  p.projectId]"> <i class="fa fa-pencil"></i> </a>&nbsp;-->
+            <!--<a> <i class="fa fa-pencil"></i> </a>&nbsp;-->
+          <button (click)="openConfirmDialog(u.userId, template)" title="Delete"> <i class="fa fa-trash-o "></i> </button>
+          <!--<a> <i class="fa fa-trash-o "></i> </a>-->
+        </span>
+    </td>
+  </tr>
+
+  <div class="col-12 justify-content-center mb-5">
+    <ngb-pagination [collectionSize]="totalItems" [(page)]="currentPage" (pageChange)="pageChanged(currentPage)"
+                    [boundaryLinks]="true"></ngb-pagination>
+  </div>
+
+  <!--<pagination-->
+  <!--[boundaryLinks]="true"-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(numPages)="smallnumPages = $event"-->
+  <!--previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">-->
+  <!--</pagination>-->
+
+
+  <!--<div class="row">-->
+  <!--<div class="col-xs-12 col-12">-->
+  <!--<pagination-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--[directionLinks]="false"-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(numPages)="smallnumPages = $event">-->
+  <!--</pagination>-->
+  <!--</div>-->
+
+  <!--<div class="col-xs-12 col-12">-->
+  <!--<pager-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(pageChanged)="pageChanged($event)"-->
+  <!--pageBtnClass="btn"-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--class="pull-left">-->
+  <!--</pager>-->
+  <!--</div>-->
+  <!--</div>-->
+
+  </tbody>
+</table>
+
+<ng-template #template>
+  <div class="modal-header">
+    <strong class="modal-title">Delete Confirm</strong>
+    <button type="button" class="close" aria-label="Close" (click)="decline()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>{{message}}</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="confirmDialog()">Ok</button>
+    <button type="button" class="btn btn-primary" (click)="decline();">Cancel</button>
+  </div>
+</ng-template>
+

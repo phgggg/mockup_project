@@ -1,0 +1,62 @@
+<div class="title">
+  <strong> {{ title }} </strong>
+</div>
+<div class=" body ">
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+    <div class="ContenAdd">
+      <div class="row">
+        <label class="col-sm-6">Project Name: </label>
+        <div class="col-sm-6">
+          <input type="text" formControlName="projectName" placeholder="project name">
+          <div *ngIf="submitted && f.projectName.errors" class="err">
+            <div *ngIf="f.projectName.errors.required">Project Name is required, bro !!</div>
+          </div>
+        </div>
+      </div>
+
+      <!--<div class="row">-->
+        <!--<label class="col-sm-6">DeadLine: </label>-->
+        <!--<div class="col-sm-6">-->
+          <!--<input type="text"-->
+                 <!--formControlName="deadLine"-->
+                 <!--placeholder="mm/dd/yy"-->
+                 <!--class="form-control"-->
+                 <!--bsDatepicker>-->
+          <!--<div *ngIf="submitted && f.deadLine.errors" class="err">-->
+            <!--<div *ngIf="f.deadLine.errors.required">Deadline is required, bro !!</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+
+      <div class="row">
+        <label class="col-sm-6"> DeadLine:  </label>
+        <div class="col-md-6">
+          <input type="text" formControlName="deadLine" placeholder="Deadline">
+          <div *ngIf="submitted && f.deadLine.errors" class="err">
+            <div *ngIf="f.deadLine.errors.required">Deadline is required, bro !!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="col-sm-6">Description: </label>
+        <div class="col-md-6">
+          <input type="text" formControlName="description">
+          <div *ngIf="submitted && f.description.errors" class="err">
+            <div *ngIf="f.description.errors.required">Description is required, bro !!</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="row">
+      <div class="btn-footer">
+        <button type="submit" class="btn btn-primary"> OK</button>
+        <button type="submit" class="btn btn-danger" [routerLink]="['/admin/list-car']"> Cancel</button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+

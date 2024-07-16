@@ -1,0 +1,129 @@
+<div class="title">
+  <h4>List Project</h4>
+</div>
+<button type="button" class="btn btn-success" (click)="openModalEditOrAdd(0, template)">New Project +</button>
+<table class="table table-bordered table-striped">
+  <thead>
+  <tr>
+    <th>Name Project</th>
+    <th>Description</th>
+    <th>Created Date</th>
+    <th>DeadLine</th>
+    <th>Created By</th>
+    <th>Team Number</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody *ngIf="project$">
+  <tr *ngFor="let p of project$.listData">
+    <td>{{ p.projectName }}</td>
+    <td>{{ p.description }}</td>
+    <td>{{ p.createdDate | date: 'dd-MM-yyyy' }}</td>
+    <td>{{ p.deadline | date: 'dd-MM-yyyy'}}</td>
+    <td>{{ p.createdBy }}</td>
+    <td *ngIf="p.teams == null">0</td>
+    <td *ngIf="p.teams != null">{{p.teams.length}}</td>
+    <td>
+        <span>
+            <a [routerLink]="['/office/project-detail/',  p.projectId]"> <i class="fa fa-pencil"></i> </a>&nbsp;
+            <a (click)="openModalEditOrAdd(p.projectId, template)"> <i class="fa fa-pencil"></i> </a>&nbsp;
+          <a (click)="openModal(p.projectId)" title="Delete"> <i class="fa fa-trash-o "></i> </a>
+          <!--<a> <i class="fa fa-trash-o "></i> </a>-->
+        </span>
+    </td>
+  </tr>
+
+  <div class="col-12 justify-content-center mb-5">
+    <ngb-pagination [collectionSize]="totalItems" [(page)]="currentPage" (pageChange)="pageChanged(currentPage)"
+                    [boundaryLinks]="true"></ngb-pagination>
+  </div>
+  <!--<div class="row">-->
+  <!--<div class="col-xs-12 col-12">-->
+  <!--<pagination-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--[directionLinks]="false"-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(numPages)="smallnumPages = $event">-->
+  <!--</pagination>-->
+  <!--</div>-->
+
+  <!--<div class="col-xs-12 col-12">-->
+  <!--<pager-->
+  <!--[totalItems]="totalItems"-->
+  <!--[(ngModel)]="currentPage"-->
+  <!--(pageChanged)="pageChanged($event)"-->
+  <!--pageBtnClass="btn"-->
+  <!--[itemsPerPage]="itemsPerPage"-->
+  <!--class="pull-left">-->
+  <!--</pager>-->
+  <!--</div>-->
+  <!--</div>-->
+
+  </tbody>
+</table>
+
+
+<ng-template #template>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">{{ title }}</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+      <div class="Content">
+        <div class="">
+          <label class="">Project Name: </label>
+          <div class="modal-control">
+            <!--<input type="text" formControlName="projectName" placeholder="project name" [value]="project.data.projectName">-->
+            <input type="text" formControlName="projectName" placeholder="project name">
+            <div *ngIf="submitted && f.projectName.errors" class="err">
+              <div *ngIf="f.projectName.errors.required">Project Name is required, bro !!</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="">
+          <label class=""> DeadLine: </label>
+          <div class="modal-control">
+            <input type="date" formControlName="deadline" placeholder="deadline">
+            <div *ngIf="submitted && f.deadline.errors" class="err">
+              <div *ngIf="f.deadline.errors.required">Deadline is required, bro !!</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="">
+          <label class="">Description: </label>
+          <div class="modal-control">
+            <textarea rows="4" cols="50" formControlName="description" placeholder="description"></textarea>
+            <div *ngIf="submitted && f.description.errors" class="err">
+              <div *ngIf="f.description.errors.required">Description is required, bro !!</div>
+            </div>
+          </div>
+        </div>
+        <!--<div class="">-->
+        <!--<label class="">TeamName: </label>-->
+        <!--<div class="modal-control">-->
+        <!--<input type="text" formControlName="teamName" placeholder="Team Name"/>-->
+        <!--<div *ngIf="submitted && f.teamName.errors" class="err">-->
+        <!--<div *ngIf="f.teamName.errors.required">Team Name is required, bro !!</div>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</div>-->
+      </div>
+
+      <div class="btn-modal">
+        <div class="btn-footer">
+          <button type="submit" class="btn btn-primary"> OK</button> &nbsp;
+          <button type="submit" class="btn btn-danger" (click)="modalRef.hide()"> Cancel</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</ng-template>
+

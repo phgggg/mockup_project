@@ -1,0 +1,19 @@
+{
+  "nav-bar": {
+    "title-home": "Trang chủ",
+    "title-about": "Về chúng tôi",
+    "login": "Đăng nhập",
+    "resister": "Đăng ký",
+    "logout": "Logout"
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "user-name": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "error": {
+      "unauthorized": "Tên đăng nhập hoặc mật khẩu không đúng",
+      "err": "Lỗi hệ thống, vui lòng thử lại sau"
+    },
+    "logout": "Logout"
+  }
+}
