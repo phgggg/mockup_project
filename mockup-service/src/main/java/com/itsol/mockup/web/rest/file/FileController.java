@@ -57,8 +57,9 @@ public class FileController {
     }
 
     @RequestMapping(value = "/share", method = RequestMethod.PUT)
-    public ResponseEntity<BaseResultDTO> shareToOtherUser(@RequestParam("fileId") Long id, @RequestParam("teamId") Long teamId) {
-        BaseResultDTO result = fileService.shareToOtherUser(id, teamId);
+    public ResponseEntity<BaseResultDTO> shareToOtherUser(@RequestParam("fileId") Long id, @RequestParam("teamId") Long teamId
+                                                        , HttpServletRequest request) {
+        BaseResultDTO result = fileService.shareToOtherUser(id, teamId, request);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

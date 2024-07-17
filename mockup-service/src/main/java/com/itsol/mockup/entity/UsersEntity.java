@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "USERS")
+@Table(name = "USERS", indexes = {
+        @Index(columnList = "userName", unique = true)
+})
 @Getter
 @Setter
 public class UsersEntity {
@@ -81,11 +83,6 @@ public class UsersEntity {
     )
     private List<RoleEntity> roles = new ArrayList<>();
 
-
-    @JsonIgnore
-    @ManyToMany(mappedBy = "usersEntities")
-    private List<TeamEntity> teamEntityList = new ArrayList<>();
-
     @OneToMany(mappedBy = "userEntity")
     private List<CommentsEntity> commentsEntities = new ArrayList<>();
 
@@ -98,9 +95,32 @@ public class UsersEntity {
     @OneToMany(mappedBy = "user")
     private List<PermissionEntity> permissions = new ArrayList<>();
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="TEAM_ID")
+    private TeamEntity teamEntity;
 
-
-
-
-
+    @Override
+    public String toString() {
+        return "UsersEntity{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", passWord='" + passWord + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", skypeName='" + skypeName + '\'' +
+                ", facebookUrl='" + facebookUrl + '\'' +
+                ", address='" + address + '\'' +
+                ", education='" + education + '\'' +
+                ", university='" + university + '\'' +
+                ", faculty='" + faculty + '\'' +
+                ", graduationDate=" + graduationDate +
+                ", lastLogin=" + lastLogin +
+                ", active=" + active +
+                ", reason='" + reason + '\'' +
+                ", imageId=" + imageId +
+                ", levelId=" + levelId +
+                '}';
+    }
 }

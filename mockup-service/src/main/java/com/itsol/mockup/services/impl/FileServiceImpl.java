@@ -151,7 +151,7 @@ public class FileServiceImpl extends BaseService implements FileService {
     }
 
     @Override
-    public BaseResultDTO shareToOtherUser(Long id, Long teamId) {
+    public BaseResultDTO shareToOtherUser(Long id, Long teamId, HttpServletRequest httpServletRequest) {
         BaseResultDTO baseResultDTO = new BaseResultDTO();
         try{
             FileEntity fileToShare = fileRepository.findFileEntitiesByFileId(id);
@@ -163,7 +163,7 @@ public class FileServiceImpl extends BaseService implements FileService {
             fileToShare.setAllowedUser(allowed);
             fileRepository.save(fileToShare);
             baseResultDTO.setSuccess();
-            baseResultDTO.setDescription("http://localhost:8888"+"/api/file"+"/downloadFile/"+fileToShare.getFileName());
+            baseResultDTO.setDescription("http://" + httpServletRequest.getHeader("host") + "/api/file"+"/downloadFile/"+fileToShare.getFileName());
         } catch (Exception e){
             logger.error("error while finding file or team by id{}", e.getMessage(), e);
             baseResultDTO.setFail(e.getMessage());

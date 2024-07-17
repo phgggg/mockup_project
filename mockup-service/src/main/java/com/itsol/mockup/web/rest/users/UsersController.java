@@ -4,6 +4,8 @@ import com.itsol.mockup.services.UsersService;
 import com.itsol.mockup.web.dto.request.IdRequestDTO;
 import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
+import com.itsol.mockup.web.dto.timesheet.AddTaskDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import com.itsol.mockup.web.rest.BaseRest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,10 +93,10 @@ public class UsersController extends BaseRest {
     }
 
     @PostMapping(value = "/addTaskToUser")
-    public ResponseEntity<BaseResultDTO> addTaskToUser(@RequestParam("userID") Long id,
-                                                       @RequestParam("task_name") String task_name,
-                                                       @RequestParam("projectId") Long projectId) {
-        BaseResultDTO baseResultDTO = usersService.updateTaskUser(id, task_name, projectId);
+    public ResponseEntity<BaseResultDTO> addTaskToUser(@RequestBody AddTaskDTO addTaskDTO,
+                                                       @RequestHeader HttpHeaders header) {
+//        BaseResultDTO baseResultDTO = usersService.addTaskToUser(userName, timesheetDTO, projectId, retrieveToken(header));
+        BaseResultDTO baseResultDTO = usersService.addTaskToUser(addTaskDTO, retrieveToken(header));
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 

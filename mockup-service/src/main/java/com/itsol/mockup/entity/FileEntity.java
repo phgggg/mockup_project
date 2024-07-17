@@ -1,5 +1,6 @@
 package com.itsol.mockup.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +24,9 @@ public class FileEntity {
     @Column(name = "FILE_URL")
     private String fileUrl;
 
+    @Column(name = "UPLOADED_BY")
+    private String uploadedBy;
+
     @Column(name = "ALLOWED_USER")
     private ArrayList<Long> allowedUser;
 
@@ -37,6 +41,11 @@ public class FileEntity {
 
     @Column(name= "NEXT_URL")
     private String nextUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "PROJECT_ID")
+    @JsonIgnore
+    private ProjectEntity project;
 
     public FileEntity() {
     }

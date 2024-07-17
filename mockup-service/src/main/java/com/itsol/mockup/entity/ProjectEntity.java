@@ -37,4 +37,7 @@ public class ProjectEntity {
 
     @OneToMany(mappedBy="projectEntity", fetch = FetchType.LAZY)
     private List<TeamEntity> teams;
+
+    @OneToMany(mappedBy="project", fetch = FetchType.LAZY)
+    private List<FileEntity> files;
 }

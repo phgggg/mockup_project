@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Entity
 @Table(name = "TIMESHEET")
@@ -26,6 +27,18 @@ public class TimeSheetEntity {
     @Column(name = "CREATED_DATE")
     private Timestamp createdDate;
 
+    @Column(name = "START_DATE_EXPECTED")
+    private Timestamp startDateExpected;
+
+    @Column(name = "ACTUAL_START_DATE")
+    private Timestamp actualStartDate;
+
+    @Column(name = "FINISH_DATE_EXPECTED")
+    private Timestamp finishDateExpected;
+
+    @Column(name = "ACTUAL_FINISH_DATE")
+    private Timestamp actualFinishDate;
+
     @Column(name = "RESULT")
     private String result;
 
@@ -38,10 +51,19 @@ public class TimeSheetEntity {
     @Column(name = "PROJECT_ID")
     private Long projectId;
 
+    @Column(name = "CREATED_BY")
+    private String createdBy;
+
+    @Column(name = "LAST_UPDATE")
+    private Timestamp lastUpdate;
+
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "USER_ID")
+    @JoinColumn(name = "USERS_ID")
     private UsersEntity usersEntity;
+
+    @OneToMany(mappedBy = "timeSheetEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TaskDetailEntity> taskDetails;
 
     @Override
     public String toString() {
@@ -49,11 +71,18 @@ public class TimeSheetEntity {
                 "timesheetId=" + timesheetId +
                 ", task='" + task + '\'' +
                 ", createdDate=" + createdDate +
+                ", startDateExpected=" + startDateExpected +
+                ", actualStartDate=" + actualStartDate +
+                ", finishDateExpected=" + finishDateExpected +
+                ", actualFinishDate=" + actualFinishDate +
                 ", result='" + result + '\'' +
                 ", note='" + note + '\'' +
                 ", status=" + status +
                 ", projectId=" + projectId +
-                ", usersEntity=" + usersEntity +
+                ", addByUser=" + createdBy +
+                ", lastUpdate=" + lastUpdate +
+                ", assignedUser=" + usersEntity +
+                ", taskDetails=" + taskDetails +
                 '}';
     }
 }

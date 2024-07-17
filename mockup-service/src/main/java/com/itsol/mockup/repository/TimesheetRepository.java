@@ -23,4 +23,5 @@ public interface TimesheetRepository extends JpaRepository<TimeSheetEntity,Long>
     @Query(value = "SELECT t.* FROM timesheet t JOIN project p ON t.project_id = p.project_id WHERE t.user_id = :id and p.project_id = :projectId",
             nativeQuery = true)
     List<TimeSheetEntity> findTimeSheetEntitiesByUserIdAndProjectId(Long id, Long projectId);
+
 }

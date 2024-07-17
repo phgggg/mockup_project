@@ -16,7 +16,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
-import org.hibernate.type.ShortType;
 import org.hibernate.type.StringType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,7 +45,7 @@ public class UsersRepositoryImpl implements UsersRepositoryCustom {
                 sb.append(" AND UPPER(u.full_name) like :p_full_name ");
             }
             if (!DataUtils.isNullOrEmpty(requestDTO.getUserName())) {
-                sb.append(" AND UPPER(u.user_name) like :p_user_name ");
+                sb.append(" AND UPPER(u.username) like :p_user_name ");
             }
 
             SQLQuery query = session.createSQLQuery(sb.toString());
@@ -68,19 +67,17 @@ public class UsersRepositoryImpl implements UsersRepositoryCustom {
                                 .replaceAll("_", "\\_")
                         + "%");
             }
-
-            query.addScalar("id", new LongType());
+            query.addScalar("userId", new LongType());
             query.addScalar("userName", new StringType());
             query.addScalar("passWord", new StringType());
             query.addScalar("fullName", new StringType());
-            query.addScalar("email", new ShortType());
-            query.addScalar("skypeName", new ShortType());
-            query.addScalar("phone", new ShortType());
-            query.addScalar("levelId", new ShortType());
-            query.addScalar("imageId", new ShortType());
+            query.addScalar("email", new StringType());
+            query.addScalar("skypeName", new StringType());
+            query.addScalar("phone", new StringType());
+            query.addScalar("levelId", new IntegerType());
+            query.addScalar("imageId", new IntegerType());
 
             query.setResultTransformer(Transformers.aliasToBean(UsersDTO.class));
-
             int count = 0;
             List<UsersDTO> list = query.list();
             if (list.size() > 0) {
@@ -167,4 +164,5 @@ public class UsersRepositoryImpl implements UsersRepositoryCustom {
         }
         return null;
     }
+
 }

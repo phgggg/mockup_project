@@ -15,13 +15,11 @@ import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.response.ProjectStatusDTO;
 import com.itsol.mockup.web.dto.response.SingleResultDTO;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

@@ -11,5 +11,4 @@ import org.springframework.data.domain.Page;
 public interface UsersRepositoryCustom {
     Page<UsersDTO> findUsersByFullNameAndUserName(SearchUsersRequestDTO requestDTO);
     Page<UsersDTO> findUserNotRequest(IdRequestDTO request);
-
 }

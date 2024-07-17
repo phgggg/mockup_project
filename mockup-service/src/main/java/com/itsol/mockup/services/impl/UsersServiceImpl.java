@@ -1,13 +1,7 @@
 package com.itsol.mockup.services.impl;
 
-import com.itsol.mockup.entity.ProjectEntity;
-import com.itsol.mockup.entity.RoleEntity;
-import com.itsol.mockup.entity.TimeSheetEntity;
-import com.itsol.mockup.entity.UsersEntity;
-import com.itsol.mockup.repository.ProjectRepository;
-import com.itsol.mockup.repository.TimesheetRepository;
-import com.itsol.mockup.repository.UsersRepository;
-import com.itsol.mockup.repository.UsersRepositoryCustom;
+import com.itsol.mockup.entity.*;
+import com.itsol.mockup.repository.*;
 import com.itsol.mockup.services.EmailService;
 import com.itsol.mockup.services.UsersService;
 import com.itsol.mockup.utils.Constants;
@@ -18,6 +12,8 @@ import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.request.auth.AuthRequestDTO;
 import com.itsol.mockup.web.dto.response.*;
 import com.itsol.mockup.web.dto.response.auth.AuthResponseDTO;
+import com.itsol.mockup.web.dto.timesheet.AddTaskDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -88,11 +85,14 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     @Override
     public BaseResultDTO findUsersByFullNameAndUserName(SearchUsersRequestDTO requestDTO) {
         logger.info("=== START FIND ALL USERS BY FULL_NAME AND USER_NAME::");
-        SingleResultDTO<UsersDTO> respoonseSingleResultDTO = new SingleResultDTO<>();
+        ArrayResultDTO<UsersDTO> respoonseSingleResultDTO = new ArrayResultDTO<>();
         try {
             Page<UsersDTO> rawDatas = usersRepositoryCustom.findUsersByFullNameAndUserName(requestDTO);
-            if (rawDatas.getContent().size() > 0) {
-                respoonseSingleResultDTO.setSuccess((UsersDTO) rawDatas.getContent());
+            if(rawDatas == null){
+                respoonseSingleResultDTO.setFail("null result");
+            }
+            else if (!rawDatas.getContent().isEmpty()) {
+                respoonseSingleResultDTO.setSuccess((List<UsersDTO>) rawDatas.getContent());
             }
             logger.info("=== FIND ALL USERS BY FULL_NAME AND USER_NAME RESPONSE::" + respoonseSingleResultDTO.getErrorCode());
         } catch (Exception ex) {
@@ -318,28 +318,46 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     }
 
     @Override
-    public BaseResultDTO updateTaskUser(Long id, String task, Long projectId) {
-        BaseResultDTO baseResultDTO = new BaseResultDTO();
+    public BaseResultDTO addTaskToUser(AddTaskDTO addTaskDTO, String token) {//dto
+        SingleResultDTO singleResultDTO = new SingleResultDTO();
         try {
-            UsersEntity usersEntity = usersRepository.findUsersEntityByUserId(id);
             TimeSheetEntity taskToAdd = new TimeSheetEntity();
-            ProjectEntity projectEntity = projectRepository.getProjectEntityByProjectId(projectId);
-            if (usersEntity != null) {
-                taskToAdd.setTask(task);
+            ProjectEntity projectEntity = projectRepository.getProjectEntityByProjectId(addTaskDTO.getProjectId());
+
+            UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(addTaskDTO.getUserName());
+
+            TeamEntity userTeam = usersEntity.getTeamEntity();
+            ProjectEntity projectOfTeam = userTeam.getProjectEntity();
+
+            UsersEntity createdBy = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
+
+            if (usersEntity != null && Objects.equals(projectOfTeam.getProjectId(), projectEntity.getProjectId())) {
+                taskToAdd.setTask(addTaskDTO.getTimesheetDTO().getTask());
                 taskToAdd.setUsersEntity(usersEntity);
-                taskToAdd.setProjectId(projectId);
+                taskToAdd.setProjectId(addTaskDTO.getProjectId());
                 taskToAdd.setCreatedDate(getCurTimestamp());
+                taskToAdd.setStartDateExpected(addTaskDTO.getTimesheetDTO().getStartDateExpected());
+                taskToAdd.setFinishDateExpected(addTaskDTO.getTimesheetDTO().getFinishDateExpected());
                 taskToAdd.setStatus(0);
+                taskToAdd.setCreatedBy(createdBy.getUserName());
+                taskToAdd.setLastUpdate(getCurTimestamp());
                 taskToAdd.setNote("have to do " + taskToAdd.getTask() + " of project " + projectEntity.getProjectName());
                 timesheetRepository.save(taskToAdd);
                 usersRepository.save(usersEntity);
-                baseResultDTO.setSuccess();
+                singleResultDTO.setSuccess(taskToAdd);
+            }else {
+                singleResultDTO.setFail("Cannot find user/User not in proper team");
             }
         } catch (Exception e) {
             logger.error("UPDATE TASK USER ERR");
-            baseResultDTO.setFail(e.getMessage());
+            singleResultDTO.setFail(e.getMessage());
         }
-        return baseResultDTO;
+        return singleResultDTO;
+    }
+
+    @Override
+    public BaseResultDTO updateUserTask(String userName, TimesheetDTO timesheetDTO, Long projectId) {
+        return null;
     }
 
     @Override

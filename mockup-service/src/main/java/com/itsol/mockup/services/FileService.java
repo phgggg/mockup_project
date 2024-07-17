@@ -14,7 +14,7 @@ public interface FileService {
     BaseResultDTO deleteFiles(Long id);
     BaseResultDTO findFileById(Long id, Long userId);
     BaseResultDTO searchFileByKeyword(String key);
-    BaseResultDTO shareToOtherUser(Long id, Long teamId);
+    BaseResultDTO shareToOtherUser(Long id, Long teamId, HttpServletRequest httpServletRequest);
 
     Resource loadFileAsResource(String fileName);
 }

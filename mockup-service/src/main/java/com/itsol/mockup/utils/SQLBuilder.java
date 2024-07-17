@@ -24,6 +24,7 @@ public class SQLBuilder {
             // Read file
             if (folder.isFile()) {
                 String sql = new String(Files.readAllBytes(Paths.get(folder.getAbsolutePath())));
+//                System.out.println("\n aaaaaaaaaa"+sql+"\naaaaaaaaa");
                 return sql;
             }
         } catch (IOException e) {
