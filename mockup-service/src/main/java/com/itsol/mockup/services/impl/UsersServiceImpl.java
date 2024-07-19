@@ -5,6 +5,7 @@ import com.itsol.mockup.repository.*;
 import com.itsol.mockup.services.EmailService;
 import com.itsol.mockup.services.UsersService;
 import com.itsol.mockup.utils.Constants;
+import com.itsol.mockup.utils.DataUtils;
 import com.itsol.mockup.utils.TokenUtils;
 import com.itsol.mockup.web.dto.request.EmailRequest;
 import com.itsol.mockup.web.dto.request.IdRequestDTO;
@@ -12,7 +13,6 @@ import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.request.auth.AuthRequestDTO;
 import com.itsol.mockup.web.dto.response.*;
 import com.itsol.mockup.web.dto.response.auth.AuthResponseDTO;
-import com.itsol.mockup.web.dto.timesheet.AddTaskDTO;
 import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +25,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -66,7 +64,7 @@ public class UsersServiceImpl extends BaseService implements UsersService {
         try {
             Page<UsersEntity> rawDatas = usersRepository.findAll(PageRequest.of(page, pageSize));
             if (rawDatas != null) {
-                if (rawDatas.getContent().size() > 0) {
+                if (!rawDatas.getContent().isEmpty()) {
                     rawDatas.getContent().forEach(user -> {
                         UsersDTO usersDTO = modelMapper.map(user, UsersDTO.class);
                         lstUsers.add(usersDTO);
@@ -92,7 +90,7 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                 respoonseSingleResultDTO.setFail("null result");
             }
             else if (!rawDatas.getContent().isEmpty()) {
-                respoonseSingleResultDTO.setSuccess((List<UsersDTO>) rawDatas.getContent());
+                respoonseSingleResultDTO.setSuccess(rawDatas.getContent());
             }
             logger.info("=== FIND ALL USERS BY FULL_NAME AND USER_NAME RESPONSE::" + respoonseSingleResultDTO.getErrorCode());
         } catch (Exception ex) {
@@ -318,35 +316,75 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     }
 
     @Override
-    public BaseResultDTO addTaskToUser(AddTaskDTO addTaskDTO, String token) {//dto
+    public BaseResultDTO addTaskToUser(String userName, TimeSheetEntity taskToAdd, Long projectId, String token) {//dto
         SingleResultDTO singleResultDTO = new SingleResultDTO();
         try {
-            TimeSheetEntity taskToAdd = new TimeSheetEntity();
-            ProjectEntity projectEntity = projectRepository.getProjectEntityByProjectId(addTaskDTO.getProjectId());
 
-            UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(addTaskDTO.getUserName());
+            ProjectEntity projectEntity = projectRepository.getProjectEntityByProjectId(projectId);
+            UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
 
-            TeamEntity userTeam = usersEntity.getTeamEntity();
-            ProjectEntity projectOfTeam = userTeam.getProjectEntity();
+            boolean userInProperTeam = false;
+            List<TeamEntity> teamList = user.getTeamEntityList();
+            for(TeamEntity t : teamList){
+                if(t.getProjectEntity().getProjectName().equals(projectEntity.getProjectName())){
+                    logger.info("user in proper team");
+                    userInProperTeam = true;
+                    break;
+                }
+            }
 
-            UsersEntity createdBy = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
-
-            if (usersEntity != null && Objects.equals(projectOfTeam.getProjectId(), projectEntity.getProjectId())) {
-                taskToAdd.setTask(addTaskDTO.getTimesheetDTO().getTask());
-                taskToAdd.setUsersEntity(usersEntity);
-                taskToAdd.setProjectId(addTaskDTO.getProjectId());
+            if(!userInProperTeam){
+                singleResultDTO.setFail("User not in proper team");
+            }
+            else if(taskToAdd.getStartDateExpected().after(projectEntity.getDeadline())){
+                singleResultDTO.setFail("Start date after deadline");
+            }
+            else if (user != null) {
+                UsersEntity createdBy = null;
+                try{
+                    createdBy = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
+                }catch (Exception tk){
+                    logger.info("token error {}",tk.getMessage());
+                }
+                taskToAdd.setUsersEntity(user);
+                taskToAdd.setProjectId(projectId);
                 taskToAdd.setCreatedDate(getCurTimestamp());
-                taskToAdd.setStartDateExpected(addTaskDTO.getTimesheetDTO().getStartDateExpected());
-                taskToAdd.setFinishDateExpected(addTaskDTO.getTimesheetDTO().getFinishDateExpected());
                 taskToAdd.setStatus(0);
                 taskToAdd.setCreatedBy(createdBy.getUserName());
                 taskToAdd.setLastUpdate(getCurTimestamp());
-                taskToAdd.setNote("have to do " + taskToAdd.getTask() + " of project " + projectEntity.getProjectName());
+                taskToAdd.setDetails("have to do " + taskToAdd.getTask() + " of project " + projectEntity.getProjectName());
+                taskToAdd.setNote("No response from user");
                 timesheetRepository.save(taskToAdd);
-                usersRepository.save(usersEntity);
+                usersRepository.save(user);
                 singleResultDTO.setSuccess(taskToAdd);
             }else {
-                singleResultDTO.setFail("Cannot find user/User not in proper team");
+                singleResultDTO.setFail("Cannot find user");
+            }
+        } catch (Exception e) {
+            logger.error("ADD TASK USER ERR");
+            singleResultDTO.setFail(e.getMessage());
+        }
+        return singleResultDTO;
+    }
+
+    @Override
+    public BaseResultDTO updateUserTask(String userName, TimeSheetEntity timeSheetEntity, Long projectId, String token) {
+        SingleResultDTO singleResultDTO = new SingleResultDTO();
+        try {
+            UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(userName);
+            TimeSheetEntity taskToUpd = timesheetRepository.getTimeSheetEntityByTimesheetId(timeSheetEntity.getTimesheetId());
+            UsersEntity createdBy = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
+            logger.info("user lay tu token {}", createdBy.getUserName());
+            if(taskToUpd!=null){
+                timeSheetEntity.setUsersEntity(usersEntity);
+                timeSheetEntity.setCreatedBy(createdBy.getUserName());
+                timeSheetEntity.setLastUpdate(getCurTimestamp());
+                timeSheetEntity.setProjectId(projectId);
+                timeSheetEntity.setNote(DataUtils.TaskComment(timeSheetEntity));
+                timesheetRepository.save(timeSheetEntity);
+                singleResultDTO.setSuccess(timeSheetEntity);
+            }else {
+                singleResultDTO.setFail("can't find task that need to update");
             }
         } catch (Exception e) {
             logger.error("UPDATE TASK USER ERR");
@@ -356,34 +394,40 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     }
 
     @Override
-    public BaseResultDTO updateUserTask(String userName, TimesheetDTO timesheetDTO, Long projectId) {
-        return null;
-    }
-
-    @Override
-    public BaseResultDTO getUserTaskStatus(Long id) {
+    public BaseResultDTO getUserTaskStatus(String userName) {
         UserTaskStatusDTO resultDTO = new UserTaskStatusDTO();
         try {
-            UsersEntity user = usersRepository.findUsersEntityByUserId(id);
-            List<ProjectEntity> userProjects = projectRepository.getProjectEntitiesByUserId(id);
+            Timestamp currentTimeStamp = getCurTimestamp();
+            UsersEntity user = usersRepository.getUsersByUserName(userName);
+            List<ProjectEntity> userProjects = projectRepository.getProjectEntitiesByUserId(user.getUserId());
+            List<TimesheetDTO> userTasksTotal = new ArrayList<>();
             if (user != null && !userProjects.isEmpty()) {
                 double taskDone = 0, taskOnGoing = 0;
                 int daysUntilNearestDeadline = Integer.MAX_VALUE, totalTaskCount = 0, currentProjectTaskCount;
                 String description = "";
                 for(ProjectEntity p : userProjects){
-                    UserTaskStatusDTO projectResult = (UserTaskStatusDTO) getUserTaskStatusByProjectId(id, p.getProjectId());
-                    currentProjectTaskCount = projectResult.getTaskStatus().size();
+                    UserTaskStatusDTO projectResult = (UserTaskStatusDTO) getUserTaskStatusByProjectId(userName, p.getProjectId());
+                    currentProjectTaskCount = projectResult.getTasksStatus().size();
                     totalTaskCount+=currentProjectTaskCount;
                     taskDone    +=projectResult.getTaskDone()   *currentProjectTaskCount;
-                    taskOnGoing +=projectResult.getTaskOngoing()*currentProjectTaskCount;
-                    if(projectResult.getDaysLeft() < daysUntilNearestDeadline) daysUntilNearestDeadline = projectResult.getDaysLeft();
-                    description+=projectResult.getDescription()+"\n";
+                    taskOnGoing +=projectResult.getTaskOnGoing()*currentProjectTaskCount;
+                    if(projectResult.getDaysLeft() < daysUntilNearestDeadline) daysUntilNearestDeadline = Math.toIntExact(projectResult.getDaysLeft());
+                    description+=projectResult.getStatusInfo()+"\n";
+                    userTasksTotal.addAll(projectResult.getTasksStatus());
                 }
-                taskDone/=totalTaskCount;
-                taskOnGoing/=totalTaskCount;
-                resultDTO.setSuccess(taskDone, taskOnGoing, daysUntilNearestDeadline);
-                resultDTO.setDescription(description);
-//                    logger.info("\n{}",description);
+
+                taskDone = Math.round(taskDone/totalTaskCount* 100.0) / 100.0;
+                taskOnGoing = Math.round(taskOnGoing/totalTaskCount * 100.0) / 100.0;
+                double taskPending =Math.round((1 - taskDone - taskOnGoing) * 100.0) / 100.0;
+                description+="In total, there are:\n";
+                description+=taskDone*100 + "% tasks done\n";
+                description+=taskOnGoing*100 + "% tasks on going\n";
+                description+=taskPending*100 + "% tasks pending\n";
+
+                resultDTO.setSuccess(convertToDto(user), taskDone, taskOnGoing, taskPending, daysUntilNearestDeadline, currentTimeStamp);
+                resultDTO.setStatusInfo(description);
+                resultDTO.setTasksStatus(userTasksTotal);
+                logger.info("\n{}",description);
             }
         }
         catch (Exception e) {
@@ -394,11 +438,13 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     }
 
     @Override
-    public BaseResultDTO getUserTaskStatusByProjectId(Long id, Long projectId) {
+    public BaseResultDTO getUserTaskStatusByProjectId(String userName, Long projectId) {
         UserTaskStatusDTO resultDTO = new UserTaskStatusDTO();
         try {
-            UsersEntity user = usersRepository.findUsersEntityByUserId(id);
-            List<TimeSheetEntity> userTasksByProject = timesheetRepository.findTimeSheetEntitiesByUserIdAndProjectId(id, projectId);
+            Timestamp currentTimeStamp = getCurTimestamp();
+            UsersEntity user = usersRepository.getUsersByUserName(userName);
+            List<TimeSheetEntity> userTasksByProject = timesheetRepository.findTimeSheetEntitiesByUserIdAndProjectId(user.getUserId(), projectId);
+            List<TimesheetDTO> userTasksByProjectDTO = new ArrayList<>();
             ProjectEntity currentPrj = projectRepository.getProjectEntityByProjectId(projectId);
             if (user != null) {
                 String description = "";
@@ -410,25 +456,34 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                 description+= "Project " + currentPrj.getProjectName()+":\n";
                 for(TimeSheetEntity timesheetObj : userTasksByProject){
                     Date taskCreateDate = timesheetObj.getCreatedDate();
-                    daysTotal = (int) TimeUnit.DAYS.convert(deadline.getTime()-taskCreateDate.getTime(), TimeUnit.MILLISECONDS);
-                    daysLeft =  (int) TimeUnit.DAYS.convert(deadline.getTime()-currentDate.getTime(), TimeUnit.MILLISECONDS);
+                    daysTotal = (int) DataUtils.dayDiff(deadline, taskCreateDate);
+                    daysLeft =  (int) DataUtils.dayDiff(deadline, currentDate);
                     if(daysLeft < daysUntilNearestDeadline) daysUntilNearestDeadline = daysLeft;
 
                     description+= "Task " + timesheetObj.getTask() + "(" + daysTotal + " days)" + " status: "+ timesheetObj.getStatus();
+                    try{
+                        description+= DataUtils.TaskComment(timesheetObj);
+                    }catch (Exception e){
+                        description += "Finish date not updated";
+                    }
                     description+= ", " + daysLeft + " days until deadline\n";
 
                     if(timesheetObj.getStatus() == 2) taskDone++;
                     if(timesheetObj.getStatus() == 1) taskOnGoing++;
+                    userTasksByProjectDTO.add(convertToDto(timesheetObj));
                 }
-                taskDone /= userTasksByProject.size();
-                taskOnGoing /= userTasksByProject.size();
+
+                taskDone = Math.round(taskDone/userTasksByProject.size()* 100.0) / 100.0;
+                taskOnGoing = Math.round(taskOnGoing/userTasksByProject.size() * 100.0) / 100.0;
+                double taskPending =Math.round((1 - taskDone - taskOnGoing) * 100.0) / 100.0;
 
                 description+=taskDone*100 + "% tasks done\n";
                 description+=taskOnGoing*100 + "% tasks on going\n";
+                description+=taskPending*100 + "% tasks pending\n";
 
-                resultDTO.setSuccess(userTasksByProject, taskDone, taskOnGoing, daysUntilNearestDeadline);
-                resultDTO.setDescription(description);
-                logger.info("\n{}", description);
+                resultDTO.setSuccess(convertToDto(user), userTasksByProjectDTO, taskDone, taskOnGoing, taskPending, daysUntilNearestDeadline, currentTimeStamp);
+                resultDTO.setStatusInfo(description);
+//                logger.info("\n{}", description);
             }
         }
         catch (Exception e) {
@@ -436,6 +491,16 @@ public class UsersServiceImpl extends BaseService implements UsersService {
             resultDTO.setFail(e.getMessage());
         }
         return resultDTO;
+    }
+
+    private TimesheetDTO convertToDto(TimeSheetEntity timeSheetEntity) {
+        TimesheetDTO timesheetDTO = modelMapper.map(timeSheetEntity, TimesheetDTO.class);
+        return timesheetDTO;
+    }
+
+    private UsersDTO convertToDto(UsersEntity usersEntity) {
+        UsersDTO usersDTO = modelMapper.map(usersEntity, UsersDTO.class);
+        return usersDTO;
     }
 
     // ====== START SERVICES FOR AUTHENTICATION ======

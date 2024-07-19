@@ -45,6 +45,9 @@ public class TimeSheetEntity {
     @Column(name = "NOTE")
     private String note;
 
+    @Column(name = "DETAILS")
+    private String details;
+
     @Column(name = "STATUS")
     private Integer status;
 
@@ -85,4 +88,7 @@ public class TimeSheetEntity {
                 ", taskDetails=" + taskDetails +
                 '}';
     }
+
+
+
 }

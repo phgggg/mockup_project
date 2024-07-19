@@ -49,7 +49,12 @@ public class TeamEntity {
 //    @Column(name = "PROJECT_ID")
 //    private Long projectId;
 
-    @OneToMany(mappedBy = "teamEntity")
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "TEAM_USERS",
+            joinColumns = @JoinColumn(name = "TEAM_ID"),
+            inverseJoinColumns = @JoinColumn(name = "USERS_ID")
+    )
     private List<UsersEntity> usersEntities = new ArrayList<>();
 
 

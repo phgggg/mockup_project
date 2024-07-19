@@ -1,5 +1,6 @@
 package com.itsol.mockup.web.rest.users;
 
+import com.itsol.mockup.entity.TimeSheetEntity;
 import com.itsol.mockup.services.UsersService;
 import com.itsol.mockup.web.dto.request.IdRequestDTO;
 import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
@@ -8,12 +9,16 @@ import com.itsol.mockup.web.dto.timesheet.AddTaskDTO;
 import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import com.itsol.mockup.web.rest.BaseRest;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 
 @RestController
@@ -23,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 public class UsersController extends BaseRest {
     @Autowired
     UsersService usersService;
+    @Autowired
+    ModelMapper modelMapper;
 
     @RequestMapping(value = "/findAllUser", method = RequestMethod.GET)
     public ResponseEntity<BaseResultDTO> users(@RequestParam("pageSize") Integer pageSize,
@@ -94,21 +101,30 @@ public class UsersController extends BaseRest {
 
     @PostMapping(value = "/addTaskToUser")
     public ResponseEntity<BaseResultDTO> addTaskToUser(@RequestBody AddTaskDTO addTaskDTO,
-                                                       @RequestHeader HttpHeaders header) {
+                                                       @RequestHeader HttpHeaders header) throws ParseException {
 //        BaseResultDTO baseResultDTO = usersService.addTaskToUser(userName, timesheetDTO, projectId, retrieveToken(header));
-        BaseResultDTO baseResultDTO = usersService.addTaskToUser(addTaskDTO, retrieveToken(header));
+        TimeSheetEntity taskToAdd = convertToEntity(addTaskDTO.getTimesheetDTO());
+        BaseResultDTO baseResultDTO = usersService.addTaskToUser(addTaskDTO.getUserName(), taskToAdd, addTaskDTO.getProjectId(), retrieveToken(header));
+        return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/updateTask")
+    public  ResponseEntity<BaseResultDTO> updateUserTask(@RequestBody AddTaskDTO updateTask,
+                                                         @RequestHeader HttpHeaders header) throws ParseException {
+        TimeSheetEntity taskToUpdate = convertToEntity(updateTask.getTimesheetDTO());
+        BaseResultDTO baseResultDTO = usersService.updateUserTask(updateTask.getUserName(), taskToUpdate, updateTask.getProjectId(), retrieveToken(header));
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/taskStatus")
-    public ResponseEntity<BaseResultDTO> getUserTaskStatus(@RequestParam("id") Long id) {
-        BaseResultDTO baseResultDTO = usersService.getUserTaskStatus(id);
+    public ResponseEntity<BaseResultDTO> getUserTaskStatus(@RequestParam("username") String userName) {
+        BaseResultDTO baseResultDTO = usersService.getUserTaskStatus(userName);
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/taskStatusByProject")
-    public ResponseEntity<BaseResultDTO> getUserTaskStatusByProjectId(@RequestParam("id") Long id, @RequestParam("projectId") Long projectId) {
-        BaseResultDTO baseResultDTO = usersService.getUserTaskStatusByProjectId(id, projectId);
+    public ResponseEntity<BaseResultDTO> getUserTaskStatusByProjectId(@RequestParam("username") String userName, @RequestParam("projectId") Long projectId) {
+        BaseResultDTO baseResultDTO = usersService.getUserTaskStatusByProjectId(userName, projectId);
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
@@ -117,5 +133,17 @@ public class UsersController extends BaseRest {
 //        BaseResultDTO baseResultDTO  = usersService.updateActiceUser(userName);
 //        return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
 //    }
+
+    private TimeSheetEntity convertToEntity(TimesheetDTO timesheetDTO) throws ParseException {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetDTO, TimeSheetEntity.class);
+        System.out.println(timeSheetEntity.toString());
+//        if (timesheetDTO.getTimesheetId() != null) {
+//            TimeSheetEntity oldTimeSheet = postService.getPostById(timesheetDTO.getTimesheetId());
+//            timeSheetEntity.setRedditID(oldTimeSheet.getRedditID());
+//            timeSheetEntity.setSent(oldTimeSheet.isSent());
+//        }
+        return timeSheetEntity;
+    }
 
 }

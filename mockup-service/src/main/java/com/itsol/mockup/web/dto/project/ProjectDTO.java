@@ -14,21 +14,17 @@ import java.util.List;
 public class ProjectDTO {
 
     private Long projectId;
-
     private String projectName;
-
     private Date createdDate;
-
     private String createdBy;
-
+    private Date modifiedDate;
+    private String modifiedBy;
     private Date deadline;
-
     private Date startDate;
-
+    private Date actualStartDate;
+    private Date actualFinishDate;
+    private Integer status;
     private String description;
-
     private List<TeamEntity> teams;
-
     private List<IssueEntity> issues = new ArrayList<>();
-
 }

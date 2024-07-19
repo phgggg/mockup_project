@@ -96,9 +96,8 @@ public class UsersEntity {
     private List<PermissionEntity> permissions = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="TEAM_ID")
-    private TeamEntity teamEntity;
+    @ManyToMany(mappedBy = "usersEntities")
+    private List<TeamEntity> teamEntityList = new ArrayList<>();
 
     @Override
     public String toString() {

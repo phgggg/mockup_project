@@ -9,12 +9,14 @@ import com.itsol.mockup.repository.TeamRepository;
 import com.itsol.mockup.repository.TimesheetRepository;
 import com.itsol.mockup.repository.UsersRepository;
 import com.itsol.mockup.services.ProjectService;
+import com.itsol.mockup.utils.DataUtils;
 import com.itsol.mockup.utils.TokenUtils;
 import com.itsol.mockup.web.dto.project.ProjectDTO;
+import com.itsol.mockup.web.dto.project.ProjectStatusDTO;
 import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
-import com.itsol.mockup.web.dto.response.ProjectStatusDTO;
 import com.itsol.mockup.web.dto.response.SingleResultDTO;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +44,9 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
 
     @Autowired
     UsersRepository usersRepository;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @Override
     public ArrayResultDTO<ProjectEntity> findAll(Integer pageSize, Integer page) {
@@ -163,7 +168,7 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
     @Override
     public BaseResultDTO getProjectStatus(Long id) {
         ProjectStatusDTO resultDTO = new ProjectStatusDTO();
-        String description = "";
+
         try{
             ProjectEntity currentPrj = projectRepository.getProjectEntityByProjectId(id);
             List<TimeSheetEntity> timesheetList = timesheetRepository.findTimeSheetEntitiesByProjectId(currentPrj.getProjectId());
@@ -172,34 +177,52 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
             Date currentDate = new Date();
 
             long daysLeft = 0;
+            daysLeft = DataUtils.dayDiff(deadline, currentDate);
             if (currentDate.before(deadline)) {
-                daysLeft = TimeUnit.DAYS.convert(deadline.getTime() - currentDate.getTime(), TimeUnit.MILLISECONDS);
-                description += daysLeft + " days until the deadline\n";
+                resultDTO.setStatusInfo(daysLeft + " days until the deadline\n");
             } else {
-                description += "project is past the deadline\n";
+                resultDTO.setStatusInfo(resultDTO.getStatusInfo()+ "project is past the deadline by " + daysLeft*(-1) + "\n");
             }
+            resultDTO.setDaysLeft(daysLeft);
+
+            long totalDays = DataUtils.dayDiff(deadline, currentPrj.getStartDate());
+
+            resultDTO.setTotalDays(totalDays);
+            resultDTO.setProgressByTime((double) (totalDays - daysLeft) / totalDays);
+
             double taskDone = 0, taskOnGoing = 0;
             for (TimeSheetEntity timesheetObj : timesheetList) {
-
-                description += "Task " + timesheetObj.getTask()
-                            + " of user " + timesheetObj.getUsersEntity().getUserName()
-                            + " status: " + timesheetObj.getStatus() + "\n";
-
+                resultDTO.setStatusInfo(resultDTO.getStatusInfo()+
+                        "Task " + timesheetObj.getTask()
+                        + " of user " + timesheetObj.getUsersEntity().getUserName()
+                        + " status: " + timesheetObj.getStatus() + "\n");
                 if (timesheetObj.getStatus() == 2) taskDone++;
                 if (timesheetObj.getStatus() == 1) taskOnGoing++;
             }
-            taskDone /= timesheetList.size();
-            taskOnGoing /= timesheetList.size();
-            description += taskDone * 100 + "% tasks done\n";
-            description += taskOnGoing * 100 + "% tasks on going\n";
 
-            resultDTO.setSuccess(taskDone, taskOnGoing, (int) daysLeft);
-            resultDTO.setDescription(description);
-            logger.info("\n{}", description);
+            taskDone = Math.round(taskDone/timesheetList.size() * 100.0) / 100.0;
+            taskOnGoing = Math.round(taskOnGoing/timesheetList.size() * 100.0) / 100.0;
+            double taskPending =Math.round((1 - taskDone - taskOnGoing) * 100.0) / 100.0;
+
+            resultDTO.setTaskDone(taskDone);
+            resultDTO.setTaskOnGoing(taskOnGoing);
+            resultDTO.setTaskPending(taskPending);
+
+            resultDTO.setStatusInfo(resultDTO.getStatusInfo()+ taskDone * 100 + "% tasks done\n");
+            resultDTO.setStatusInfo(resultDTO.getStatusInfo()+ taskOnGoing * 100 + "% tasks on going\n");
+            resultDTO.setStatusInfo(resultDTO.getStatusInfo()+ taskPending * 100 + "% tasks pending\n");
+            resultDTO.setProjectDTO(convertToDto(currentPrj));
+            resultDTO.setSuccess();
         } catch (Exception e){
             resultDTO.setFail("error while getting list of timesheets{}",e.getMessage());
             logger.error(e.getMessage(), e);
         }
+        logger.info("\n{}", resultDTO.getStatusInfo());
         return resultDTO;
+    }
+
+    private ProjectDTO convertToDto(ProjectEntity projectEntity) {
+        ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
+        return projectDTO;
     }
 }

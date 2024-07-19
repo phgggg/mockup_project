@@ -1,7 +1,11 @@
 package com.itsol.mockup.utils;
 
+import com.itsol.mockup.entity.TimeSheetEntity;
+
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author anhvd_itsol
@@ -137,4 +141,46 @@ public class DataUtils {
     public static boolean isNullOrZero(Integer value) {
         return (value == null || value.equals(Integer.parseInt("0")));
     }
+
+    public static long dayDiff(Date a, Date b){
+        return TimeUnit.DAYS.convert(a.getTime() - b.getTime(), TimeUnit.MILLISECONDS);
+    }
+
+    public static long getDateDiff(Timestamp oldTs, Timestamp newTs, TimeUnit timeUnit) {
+        long diffInMS = newTs.getTime() - oldTs.getTime();
+        return timeUnit.convert(diffInMS, TimeUnit.MILLISECONDS);
+    }
+
+    public static String TaskComment(TimeSheetEntity timeSheetEntity) {
+        String result = null;
+        String level = "";
+        String status = "";
+
+        if(timeSheetEntity.getStatus() == 0) result = "Task is pending";
+        else if (timeSheetEntity.getStatus() == 1) {
+            result = "Task is on going";
+        } else if (timeSheetEntity.getStatus() == 2) {
+            long diff = DataUtils.getDateDiff(timeSheetEntity.getActualFinishDate(), timeSheetEntity.getFinishDateExpected(), TimeUnit.DAYS);
+            switch (Math.abs((int) diff)) {
+                case 0:
+                case 1:
+                    level += " ";
+                    break;
+                case 2:
+                case 3:
+                    level += " pretty ";
+                    break;
+                case 4:
+                case 5:
+                    level += " highly ";
+                default:
+                    level += " extremely ";
+            }
+            status = (diff < 0) ? "late" : "early";
+            if (diff == 0) status = "on time";
+            result = ", Task is done" + level + status;
+        }
+        return result;
+    }
+
 }

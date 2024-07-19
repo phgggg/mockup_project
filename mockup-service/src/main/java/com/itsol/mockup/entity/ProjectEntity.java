@@ -26,11 +26,26 @@ public class ProjectEntity {
     @Column(name = "CREATED_BY")
     private String createdBy;
 
+    @Column(name = "MODIFIED_DATE")
+    private Date modifiedDate;
+
+    @Column(name = "MODIFIED_BY")
+    private String modifiedBy;
+
     @Column(name = "DEADLINE")
     private Date deadline;
 
-    @Column(name = "start_date")
+    @Column(name = "START_DATE")
     private Date startDate;
+
+    @Column(name = "ACTUAL_START_DATE")
+    private Date actualStartDate;
+
+    @Column(name = "ACTUAL_FINISH_DATE")
+    private Date actualFinishDate;
+
+    @Column(name = "STATUS")
+    private Integer status;
 
     @Column(name = "DESCRIPTION")
     private String description;

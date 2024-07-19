@@ -20,10 +20,16 @@ public class TimesheetDTO {
     private Timestamp actualFinishDate;
     private String result;
     private String note;
+    private String details;
     private Integer status;
     private Long projectId;
     private UsersEntity createdBy;
     private Timestamp lastUpdate;
     private UsersEntity assignedUser;
     private List<TaskDetailEntity> taskDetails;
+
+    private Long daysLeft;
+    private double progressByTime;
+    private String description;
+
 }
