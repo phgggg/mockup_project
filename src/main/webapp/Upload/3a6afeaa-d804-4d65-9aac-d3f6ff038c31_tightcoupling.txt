@@ -1,0 +1,40 @@
+
+tight coupling: Các class có qh chặt chẽ -> muốn sửa class này thì thường phải sửa luôn class kia
+vd
+class Subject {
+    Topic t = new Topic();
+    public void startReading()
+    {
+        t.understand();
+    }
+}
+class Topic {
+    public void understand()
+    {
+        System.out.println("Tight coupling concept");
+    }
+}
+
+loose coupling: Giảm phụ thuộc giữa các class
+vd
+public interface Topic
+{
+    void understand();
+}
+class Topic1 implements Topic {
+public void understand()
+    {
+        System.out.println("Got it");
+    }
+} class Topic2 implements Topic {
+public void understand()
+    {
+        System.out.println("understand");
+    }
+} public class Subject {
+public static void main(String[] args)
+    {
+        Topic t = new Topic1();
+        t.understand();
+    }
+}

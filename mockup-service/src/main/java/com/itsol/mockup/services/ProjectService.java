@@ -10,6 +10,6 @@ public interface ProjectService {
     BaseResultDTO updateProject(ProjectDTO projectDTO);
     BaseResultDTO deleteProject(Long id);
     BaseResultDTO findProjectById(Long id);
-    BaseResultDTO getProjectStatus(Long id);
+    BaseResultDTO getProjectStatus(Long id, int month, int page, int pageSize);
 
 }

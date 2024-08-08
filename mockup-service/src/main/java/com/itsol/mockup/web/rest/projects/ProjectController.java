@@ -59,8 +59,11 @@ public class ProjectController extends BaseRest {
 
     @CrossOrigin
     @RequestMapping(value = "/projects/projectStatus",method = RequestMethod.GET)
-    public ResponseEntity<BaseResultDTO> getProjectStatus(@RequestParam("id") long id) {
-        BaseResultDTO result = projectService.getProjectStatus(id);
+    public ResponseEntity<BaseResultDTO> getProjectStatus(@RequestParam("id") long id,
+                                                          @RequestParam("month") int month,
+                                                          @RequestParam("page") int page,
+                                                          @RequestParam("pageSize") int pageSize) {
+        BaseResultDTO result = projectService.getProjectStatus(id, month, page, pageSize);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 

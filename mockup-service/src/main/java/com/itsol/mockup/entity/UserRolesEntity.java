@@ -10,11 +10,13 @@ import javax.persistence.*;
 @Getter
 @Setter
 public class UserRolesEntity {
+    @Id
+    @Column(name="ID")
+    private Long id;
 
     @Column(name="ROLE_ID")
     private Long roleId;
 
-    @Id
     @Column(name="USERS_ID")
     private Long userId;
 }

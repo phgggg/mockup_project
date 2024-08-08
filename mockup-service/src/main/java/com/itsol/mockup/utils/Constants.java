@@ -15,18 +15,17 @@ public interface Constants {
 //        String DELETE_ERROR = "DELETE_ERROR";
 //    }
     //auth
-    long TIME_TOKEN_EXPIRE = 3600000000L;
+    long TIME_TOKEN_EXPIRE = 36000000000L;
     String SECRET = "secretKey";
     String STATUS_CODE_USERNAME_OR_PASSWORD_INVALID = "30";
-    String ENPOINT_LOGIN = "/auth/login";
+    String ENPOINT_LOGIN = "/auth/loginTemp";
 //    String ENPOINT_LOGIN = "/auth";
     String ENPOINT_REGISTER = "/api/register";
-    String ENPOINT_MATCH_API = "/**";
-//    String ENPOINT_MATCH_API = "/api/**";
-    String ENPOINT_MATCH_AUTH_API = "/auth/api/**";
+//    String ENPOINT_MATCH_API = "/**";
+    String ENPOINT_MATCH_API = "/api/**";
+    String ENPOINT_MATCH_AUTH_API = "/auth/**";
     String ENPOINT_MATCH_AUTH_API_ACTIVE_USER = "/api/updateActiveUser";
-
-
+    String ENPOINT_UPLOAD = "/Upload/**";
     int MIN_LEHGTH_PASSWORD = 6;
 
 
@@ -37,6 +36,23 @@ public interface Constants {
     String DELETE_ERROR = "02";
     String ERR_CODE_ITEM_NOT_FOUND = "03";
     String ERROR_401 = "401";
+
+    String[] months = {
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+    };
+    long workingTimePerWeek = 40L;
+    long workingTimePerMonth = 160L;
 //    public ResultDTO pageToObj (Page<Object> page) {
 //        ResultDTO resultDTO = new ResultDTO();
 //        if(page != null) {

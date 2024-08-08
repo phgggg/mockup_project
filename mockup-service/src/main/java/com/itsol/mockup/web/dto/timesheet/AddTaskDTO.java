@@ -7,6 +7,9 @@ import lombok.Setter;
 @Setter
 @Getter
 public class AddTaskDTO extends BaseDTO {
+    /*protected Integer pageSize;
+    protected Integer page;
+    protected String sort;*/
     private String userName;
     private TimesheetDTO timesheetDTO;
     private Long projectId;

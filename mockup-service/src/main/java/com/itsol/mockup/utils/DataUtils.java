@@ -1,9 +1,15 @@
 package com.itsol.mockup.utils;
 
+import com.itsol.mockup.entity.FileEntity;
 import com.itsol.mockup.entity.TimeSheetEntity;
+import com.itsol.mockup.repository.ProjectRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.*;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -151,36 +157,37 @@ public class DataUtils {
         return timeUnit.convert(diffInMS, TimeUnit.MILLISECONDS);
     }
 
-    public static String TaskComment(TimeSheetEntity timeSheetEntity) {
-        String result = null;
-        String level = "";
-        String status = "";
+    public static String escapeSpecialChars(String input) {
+        return input.trim()
+                .replace("\\", "\\\\")
+                .replaceAll("%", "\\%")
+                .replaceAll("_", "\\_");
+    }
 
-        if(timeSheetEntity.getStatus() == 0) result = "Task is pending";
-        else if (timeSheetEntity.getStatus() == 1) {
-            result = "Task is on going";
-        } else if (timeSheetEntity.getStatus() == 2) {
-            long diff = DataUtils.getDateDiff(timeSheetEntity.getActualFinishDate(), timeSheetEntity.getFinishDateExpected(), TimeUnit.DAYS);
-            switch (Math.abs((int) diff)) {
-                case 0:
-                case 1:
-                    level += " ";
-                    break;
-                case 2:
-                case 3:
-                    level += " pretty ";
-                    break;
-                case 4:
-                case 5:
-                    level += " highly ";
-                default:
-                    level += " extremely ";
-            }
-            status = (diff < 0) ? "late" : "early";
-            if (diff == 0) status = "on time";
-            result = ", Task is done" + level + status;
+    public static int getMonthFromTimestamp(Timestamp timestamp){
+        Calendar calendar = Calendar.getInstance();
+        if(timestamp==null){
+            return -1;
         }
-        return result;
+        calendar.setTime(timestamp);
+        return calendar.get(Calendar.MONTH) + 1;
+    }
+
+    public static Timestamp getDayOfWeek(Timestamp timestamp, DayOfWeek dayOfWeek) {
+        LocalDate date = timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // Adjust to get the specific day of the week
+        return convertLocalDateToTimestamp(date.with(dayOfWeek));
+    }
+
+    public static Timestamp convertLocalDateToTimestamp(LocalDate localDate) {
+        // Combine LocalDate with a default LocalTime
+        LocalDateTime localDateTime = localDate.atStartOfDay();
+
+        // Convert to Instant using the system default time zone
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+
+        // Convert Instant to Timestamp
+        return Timestamp.from(instant);
     }
 
 }

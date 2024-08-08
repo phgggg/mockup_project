@@ -10,14 +10,17 @@ import org.springframework.data.domain.Sort;
  */
 public class PageBuilder {
     public static Pageable buildPageable(BaseDTO obj) {
-        Pageable pageable = null;
+        Pageable pageable;
+
         if (DataUtils.isNullOrEmpty(obj.getSort())) {
-            pageable = PageRequest.of(obj.getPage(), obj.getPageSize(), null);
+            pageable = PageRequest.of(obj.getPage(), obj.getPageSize());
         } else {
             String[] sorts = obj.getSort().split(",");
-            Sort sort = new Sort(Sort.Direction.fromString(sorts[1]), sorts[0]);
+            Sort.Direction direction = Sort.Direction.fromString(sorts[1]);
+            Sort sort = Sort.by(direction, sorts[0]);
             pageable = PageRequest.of(obj.getPage(), obj.getPageSize(), sort);
         }
+
         return pageable;
     }
 }

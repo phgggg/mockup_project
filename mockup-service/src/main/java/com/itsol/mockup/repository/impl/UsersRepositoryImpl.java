@@ -29,8 +29,7 @@ import java.util.List;
  */
 
 @Repository
-public class UsersRepositoryImpl implements UsersRepositoryCustom {
-    private static final Logger logger = LogManager.getLogger(UsersRepositoryImpl.class);
+public class UsersRepositoryImpl extends BaseRepo implements UsersRepositoryCustom {
 
     @Override
     public Page<UsersDTO> findUsersByFullNameAndUserName(SearchUsersRequestDTO requestDTO) {

@@ -1,0 +1,26 @@
+download eclipse jee
+package name exmp core/utility/objects
+Bai1
+java microservice*
+1.0 - compiler
+1.1 - jdbc
+1.2 - collection
+5.0 (tiger) - generic, enhanced for loop, autoboxing/unboxing, static import
+6 (mustang)
+7 (dolphin) - string in switch()
+8 lambda expression supp, stream api, launch javaFX from .jar, javascript embedded
+     javacompiler
+.java =>         .class
+nnlt có ntac bảo mật nn
+java pt mở => tính chuyên nghiệp cao
+spice code đưa vào java
+transient obj/ persistent obj
+jvm memory - 5 vùng bnho
+heap 
+method area
+pc register tdo nhanh nhất
+register > cache > ram
+enum - 
+x=6+(z=5)
+& trên bit
+&& trên toán hạng, ttu với ||

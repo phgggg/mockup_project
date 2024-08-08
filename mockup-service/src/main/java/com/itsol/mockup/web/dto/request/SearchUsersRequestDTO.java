@@ -11,6 +11,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SearchUsersRequestDTO extends BaseDTO {
+
+//    protected Integer pageSize;
+//    protected Integer page;
+//    protected String sort;
+
     private String userName;
     private String fullName;
 }

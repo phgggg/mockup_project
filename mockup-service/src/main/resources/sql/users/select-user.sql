@@ -1,11 +1,3 @@
--- SELECT
---     u.id id,
---     u.user_name userName,
---     u.pass_word passWord,
---     u.full_name fullName,
--- FROM USERS u
--- WHERE 1 = 1
-
 SELECT
     u.users_id userId,
     u.username userName,

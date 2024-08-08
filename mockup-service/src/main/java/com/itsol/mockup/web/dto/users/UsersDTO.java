@@ -1,5 +1,6 @@
 package com.itsol.mockup.web.dto.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itsol.mockup.entity.RoleEntity;
 import com.itsol.mockup.entity.TeamEntity;
 import com.itsol.mockup.entity.TimeSheetEntity;
@@ -35,6 +36,7 @@ public class UsersDTO {
     private List<RoleEntity> roles = new ArrayList<>();
 
     private List<TeamEntity> teams = new ArrayList<>();
+    @JsonIgnore
     private List<TimeSheetEntity> timeSheets;
 
 }

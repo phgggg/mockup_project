@@ -60,13 +60,17 @@ public class TimeSheetEntity {
     @Column(name = "LAST_UPDATE")
     private Timestamp lastUpdate;
 
+    @Column(name = "level_id")
+    private Long levelId;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "USERS_ID")
     private UsersEntity usersEntity;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "timeSheetEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TaskDetailEntity> taskDetails;
+    private List<SubTaskEntity> subTasks;
 
     @Override
     public String toString() {
@@ -85,7 +89,7 @@ public class TimeSheetEntity {
                 ", addByUser=" + createdBy +
                 ", lastUpdate=" + lastUpdate +
                 ", assignedUser=" + usersEntity +
-                ", taskDetails=" + taskDetails +
+                ", taskDetails=" + subTasks +
                 '}';
     }
 

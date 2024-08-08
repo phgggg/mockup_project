@@ -1,6 +1,6 @@
 package com.itsol.mockup.web.dto.timesheet;
 
-import com.itsol.mockup.entity.TaskDetailEntity;
+import com.itsol.mockup.entity.SubTaskEntity;
 import com.itsol.mockup.entity.UsersEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,10 +26,26 @@ public class TimesheetDTO {
     private UsersEntity createdBy;
     private Timestamp lastUpdate;
     private UsersEntity assignedUser;
-    private List<TaskDetailEntity> taskDetails;
+    private List<SubTaskEntity> subTasks;
 
     private Long daysLeft;
     private double progressByTime;
     private String description;
+    private String[] taskComment;
+    private double progressBySubTask;
+
+    public TimesheetDTO(){
+        this.task = "none";
+        this.result = "none";
+        this.note = "none";
+        this.details = "none";
+        this.status = 0;
+        this.createdBy = null;
+        this.assignedUser = null;
+        this.daysLeft = (long) -1;
+        this.progressBySubTask = -1;
+        this.progressByTime = -1;
+        this.description = "none";
+    }
 
 }

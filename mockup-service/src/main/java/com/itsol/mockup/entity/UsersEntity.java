@@ -89,6 +89,7 @@ public class UsersEntity {
     @OneToMany(mappedBy = "user")
     private List<NewEntity> news = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "usersEntity")
     private List<TimeSheetEntity> timeSheets = new ArrayList<>();
 

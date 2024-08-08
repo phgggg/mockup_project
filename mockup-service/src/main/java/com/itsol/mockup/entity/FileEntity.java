@@ -3,11 +3,16 @@ package com.itsol.mockup.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.TermVector;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 @Entity
+@Indexed
 @Table(name = "FILE")
 @Getter
 @Setter
@@ -21,14 +26,33 @@ public class FileEntity {
     @Column(name = "FILE_NAME")
     private String fileName;
 
+    @Column(name = "ACTUAL_NAME")
+    @Field(termVector = TermVector.YES)
+    private String actualName;
+
+    @Column(name = "FILE_TYPE_LIST")
+    private int[] fileTypeList;
+
+    @Column(name = "FILE_EXTENSION")
+    private String fileExtension;
+
     @Column(name = "FILE_URL")
     private String fileUrl;
 
     @Column(name = "UPLOADED_BY")
     private String uploadedBy;
 
+    @Column(name = "UPLOADED_DATE")
+    private Timestamp uploadedDate;
+
     @Column(name = "ALLOWED_USER")
     private ArrayList<Long> allowedUser;
+
+    @Column(name = "LAST_MODIFIED_BY")
+    private String lastModifiedBy;
+
+    @Column(name = "LAST_MODIFIED_DATE")
+    private Timestamp lastModifiedDate;
 
     @Column(name= "PREVIOUS_VER")
     private Long previousVer = 0L;
@@ -55,5 +79,22 @@ public class FileEntity {
         this.fileUrl = fileUrl;
     }
 
-
+    public FileEntity(String actualName, String fileName,
+                      int[] fileTypeList, String fileExtension, String fileUrl,
+                      String uploadedBy, Timestamp uploadedDate,
+                      ArrayList<Long> allowedUser,
+                      String lastModifiedBy, Timestamp lastModifiedDate,
+                      ProjectEntity project) {
+        this.actualName = actualName;
+        this.fileName = fileName;
+        this.fileTypeList = fileTypeList;
+        this.fileExtension = fileExtension;
+        this.fileUrl = fileUrl;
+        this.uploadedBy = uploadedBy;
+        this.uploadedDate = uploadedDate;
+        this.allowedUser = allowedUser;
+        this.lastModifiedBy = lastModifiedBy;
+        this.lastModifiedDate = lastModifiedDate;
+        this.project = project;
+    }
 }

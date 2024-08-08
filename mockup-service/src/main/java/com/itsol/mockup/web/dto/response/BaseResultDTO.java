@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 public class BaseResultDTO {
     private String errorCode;
+//    private int statusCode;
     private String description;
 //    private List<?> listData = new ArrayList();
 //    private Object data;
@@ -26,6 +27,7 @@ public class BaseResultDTO {
 
     public void setSuccess(){
         this.errorCode = Constants.SUCCESS;
+//        this.statusCode = 200;
         this.description = "ok";
     }
 

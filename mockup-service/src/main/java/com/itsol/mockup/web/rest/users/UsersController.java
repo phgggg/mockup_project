@@ -2,15 +2,13 @@ package com.itsol.mockup.web.rest.users;
 
 import com.itsol.mockup.entity.TimeSheetEntity;
 import com.itsol.mockup.services.UsersService;
+import com.itsol.mockup.utils.ExcelUtil;
 import com.itsol.mockup.web.dto.request.IdRequestDTO;
 import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.timesheet.AddTaskDTO;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import com.itsol.mockup.web.rest.BaseRest;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 
 
@@ -28,8 +27,6 @@ import java.text.ParseException;
 public class UsersController extends BaseRest {
     @Autowired
     UsersService usersService;
-    @Autowired
-    ModelMapper modelMapper;
 
     @RequestMapping(value = "/findAllUser", method = RequestMethod.GET)
     public ResponseEntity<BaseResultDTO> users(@RequestParam("pageSize") Integer pageSize,
@@ -117,14 +114,21 @@ public class UsersController extends BaseRest {
     }
 
     @GetMapping(value = "/taskStatus")
-    public ResponseEntity<BaseResultDTO> getUserTaskStatus(@RequestParam("username") String userName) {
-        BaseResultDTO baseResultDTO = usersService.getUserTaskStatus(userName);
+    public ResponseEntity<BaseResultDTO> getUserTaskStatus(@RequestParam("username") String userName,
+                                                           @RequestParam("month") int month,
+                                                           @RequestParam("page") int page,
+                                                           @RequestParam("pageSize") int pageSize) {
+        BaseResultDTO baseResultDTO = usersService.getUserTaskStatus(userName, month, page, pageSize);
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/taskStatusByProject")
-    public ResponseEntity<BaseResultDTO> getUserTaskStatusByProjectId(@RequestParam("username") String userName, @RequestParam("projectId") Long projectId) {
-        BaseResultDTO baseResultDTO = usersService.getUserTaskStatusByProjectId(userName, projectId);
+    public ResponseEntity<BaseResultDTO> getUserTaskStatusByProjectId(@RequestParam("username") String userName,
+                                                                      @RequestParam("projectId") Long projectId,
+                                                                      @RequestParam("month") int month,
+                                                                      @RequestParam("page") int page,
+                                                                      @RequestParam("pageSize") int pageSize) {
+        BaseResultDTO baseResultDTO = usersService.getUserTaskStatusByProjectId(userName, projectId, month, page, pageSize);
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
@@ -134,16 +138,9 @@ public class UsersController extends BaseRest {
 //        return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
 //    }
 
-    private TimeSheetEntity convertToEntity(TimesheetDTO timesheetDTO) throws ParseException {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetDTO, TimeSheetEntity.class);
-        System.out.println(timeSheetEntity.toString());
-//        if (timesheetDTO.getTimesheetId() != null) {
-//            TimeSheetEntity oldTimeSheet = postService.getPostById(timesheetDTO.getTimesheetId());
-//            timeSheetEntity.setRedditID(oldTimeSheet.getRedditID());
-//            timeSheetEntity.setSent(oldTimeSheet.isSent());
-//        }
-        return timeSheetEntity;
-    }
+//    @GetMapping(value = "/testExcel")
+//    public void testExcel() throws IOException {
+//        ExcelUtil.testCreate();
+//    }
 
 }

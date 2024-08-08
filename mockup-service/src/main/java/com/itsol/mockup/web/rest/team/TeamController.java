@@ -67,5 +67,10 @@ public class TeamController extends BaseRest {
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/team/{id}/list")
+    public ResponseEntity<BaseResultDTO> searchUserInTeam(@PathVariable Long id){
+        BaseResultDTO baseResultDTO = teamServices.searchUserInTeam(id);
+        return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
+    }
 
 }

@@ -7,12 +7,12 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "TASK_DETAIL")
+@Table(name = "SUBTASK")
 @Getter
 @Setter
-public class TaskDetailEntity {
+public class SubTaskEntity {
     @Id
-    @Column(name = "TASK_DETAILS_ID")
+    @Column(name = "ID")
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "task_detail_seq")
     @SequenceGenerator(name = "task_detail_seq", sequenceName = "task_detail_seq", allocationSize = 1)
     private Long id;
@@ -40,6 +40,12 @@ public class TaskDetailEntity {
 
     @Column(name = "COMMENTS")
     private String comments;
+
+    @Column(name = "LAST_UPDATED")
+    private Timestamp lastUpdated;
+
+    @Column(name = "UPDATED_BY")
+    private String updatedBy;
 
     @ManyToOne
     @JoinColumn(name = "ASSIGNED_USER_ID")

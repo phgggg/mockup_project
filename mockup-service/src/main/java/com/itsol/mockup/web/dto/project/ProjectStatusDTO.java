@@ -1,8 +1,7 @@
 package com.itsol.mockup.web.dto.project;
 
-import com.itsol.mockup.entity.ProjectEntity;
-import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,36 +9,49 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ProjectStatusDTO extends BaseResultDTO {
+@AllArgsConstructor
+public class ProjectStatusDTO {
     private ProjectDTO projectDTO;
     private Long totalDays;
     private Long daysLeft;
     private double progressByTime;
     private double taskDone;
     private double taskOnGoing;
-    private double taskPending;
+    private double taskToDo;
+    private double monthTaskDoneInTotal;
+    private double monthTaskOnGoingInTotal;
+    private double monthTaskToDoInTotal;
+    private double monthTaskDoneInMonth;
+    private double monthTaskOnGoingInMonth;
+    private double monthTaskToDoInMonth;
     private List<TimesheetDTO> tasksStatus;
     private String statusInfo;
 
-    protected void setSuccess(ProjectDTO projectDTO) {
+    public ProjectStatusDTO(ProjectDTO projectDTO) {
         this.projectDTO = projectDTO;
     }
 
-    protected void setSuccess(double taskDone, double taskOngoing, double taskPending, long daysLeft) {
-        super.setSuccess();
+    public ProjectStatusDTO(double taskDone, double taskOngoing, double taskToDo, long daysLeft) {
+
         this.taskDone = taskDone;
         this.taskOnGoing = taskOngoing;
-        this.taskPending = taskPending;
+        this.taskToDo = taskToDo;
         this.daysLeft = daysLeft;
     }
 
-    protected void setSuccess(List<TimesheetDTO> tasksStatus, double taskDone, double taskOngoing, double taskPending, long daysLeft) {
-        super.setSuccess();
+    public ProjectStatusDTO(List<TimesheetDTO> tasksStatus, double taskDone, double taskOngoing, double taskToDo, long daysLeft) {
+
         this.tasksStatus = tasksStatus;
         this.taskDone = taskDone;
         this.taskOnGoing = taskOngoing;
-        this.taskPending = taskPending;
+        this.taskToDo = taskToDo;
         this.daysLeft = daysLeft;
     }
+
+    public ProjectStatusDTO(){
+
+    }
+
+
 
 }

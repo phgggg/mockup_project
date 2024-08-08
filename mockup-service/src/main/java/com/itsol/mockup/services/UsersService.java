@@ -33,8 +33,8 @@ public interface UsersService {
     BaseResultDTO updateUserTask(String userName, TimeSheetEntity taskToUpd, Long projectId, String token);
 
 //    BaseResultDTO findUserByUserName(String userName);
-    BaseResultDTO getUserTaskStatus(String userName);
-    BaseResultDTO getUserTaskStatusByProjectId(String userName, Long projectId);
+    BaseResultDTO getUserTaskStatus(String userName, int month, int page, int pageSize);
+    BaseResultDTO getUserTaskStatusByProjectId(String userName, Long projectId, int month, int page, int pageSize);
 
     // ====== START SERVICES FOR AUTHENTICATION ======
     AuthResponseDTO generateToken(AuthRequestDTO userForAuthentication);

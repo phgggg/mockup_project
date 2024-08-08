@@ -14,5 +14,5 @@ public interface TeamServices {
     BaseResultDTO deleteTeam(Long id);
     BaseResultDTO addToTeam(Long userId, Long teamId);
     BaseResultDTO removeFromTeam(Long userId, Long teamId);
-//    BaseResultDTO searchUserInTeam(Long id);
+    BaseResultDTO searchUserInTeam(Long id);
 }

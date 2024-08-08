@@ -27,19 +27,19 @@ public class LevelController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/level", method = RequestMethod.POST)
+    @RequestMapping(value = "/level/add", method = RequestMethod.POST)
     public ResponseEntity<BaseResultDTO> addLevel(@RequestBody LevelsDTO requestDTO) {
         BaseResultDTO result = levelsService.addLevel(requestDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/level", method = RequestMethod.PUT)
+    @RequestMapping(value = "/level/update", method = RequestMethod.PUT)
     public ResponseEntity<BaseResultDTO> updateLevel(@RequestBody LevelsDTO requestDTO) {
         BaseResultDTO result = levelsService.updateLevel(requestDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/level", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/level/delete", method = RequestMethod.DELETE)
     public ResponseEntity<BaseResultDTO> deleteLevel(@RequestParam("id") long id) {
         BaseResultDTO result = levelsService.deleteLevel(id);
         return new ResponseEntity<>(result, HttpStatus.OK);

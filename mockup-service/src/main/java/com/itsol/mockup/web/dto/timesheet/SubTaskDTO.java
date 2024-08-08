@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Getter
 @Setter
-public class TaskDetailDTO {
+public class SubTaskDTO {
     private Long id;
     private String taskName;
     private String description;

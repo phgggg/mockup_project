@@ -1,0 +1,6 @@
+actuator:
+theo dõi và quản lí ứng dụng trong production
+cung cấp các endpoint
+	beans: list spring beans
+	health: tình trạng
+	metrics: thông số

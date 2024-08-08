@@ -23,15 +23,6 @@ import java.util.List;
 @Service
 public class TeamServiceImpl extends BaseService implements TeamServices {
 
-    @Autowired
-    private TeamRepository teamRepository;
-
-    @Autowired
-    TokenUtils tokenUtils;
-
-    @Autowired
-    UsersRepository usersRepository;
-
 
 //    @Override
 //    public BaseResultDTO addTeam(TeamDTO teamDTO) {
@@ -175,6 +166,8 @@ public class TeamServiceImpl extends BaseService implements TeamServices {
                 List<UsersEntity> teamList = teamEntity.getUsersEntities();
                 teamList.add(usersEntity);
                 teamEntity.setUsersEntities(teamList);
+                teamEntity.setModifiedDate(getCurTimestamp());
+                teamEntity.setModifiedBy("");
                 teamRepository.save(teamEntity);
                 baseResultDTO.setSuccess();
             }
@@ -195,6 +188,8 @@ public class TeamServiceImpl extends BaseService implements TeamServices {
                 List<UsersEntity> teamList = teamEntity.getUsersEntities();
                 teamList.remove(usersEntity);
                 teamEntity.setUsersEntities(teamList);
+                teamEntity.setModifiedDate(getCurTimestamp());
+                teamEntity.setModifiedBy("");
                 teamRepository.save(teamEntity);
                 baseResultDTO.setSuccess();
             }
@@ -203,6 +198,14 @@ public class TeamServiceImpl extends BaseService implements TeamServices {
             logger.error(ex.getMessage(), ex);
         }
         return baseResultDTO;
+    }
+
+    @Override
+    public BaseResultDTO searchUserInTeam(Long id) {
+        ArrayResultDTO resultDTO = new ArrayResultDTO<>();
+        List<UsersEntity> userList = usersRepository.findUserEntitiesByTeamId(id);
+        resultDTO.setSuccess(userList);
+        return resultDTO;
     }
 
 }

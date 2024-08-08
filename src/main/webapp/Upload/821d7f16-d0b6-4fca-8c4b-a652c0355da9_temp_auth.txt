@@ -1,0 +1,11 @@
+{
+"name": "phong",
+"password": "1234",
+"email": "buituanphong8@gmail.com",
+"roles": "ROLE_USER"
+}
+
+{
+    "username": "phong",
+    "password": "1234"
+}

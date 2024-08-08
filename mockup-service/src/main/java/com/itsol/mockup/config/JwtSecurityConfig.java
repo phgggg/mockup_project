@@ -40,7 +40,6 @@ import java.util.List;
 //@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
-
 public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthenticationEntryPoint entryPoint;
@@ -68,6 +67,11 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+//
+//    @Bean(name = "jwtModelMapper")
+//    public ModelMapper jwtModelMapper() {
+//        return new ModelMapper();
+//    }
 
     @Bean
     @Override
@@ -130,7 +134,7 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // filter.setAuthenticationSuccessHandler(new JwtSuccessHandler());
+        filter.setAuthenticationSuccessHandler(new JwtSuccessHandler());
         return filter;
     }
 
@@ -176,11 +180,12 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().authorizeRequests()
                 .antMatchers(Constants.ENPOINT_LOGIN, Constants.ENPOINT_LOGIN).permitAll() // Login end-point
 //                .and().authorizeRequests()
-                .antMatchers(Constants.ENPOINT_MATCH_AUTH_API).authenticated()
+                .antMatchers(Constants.ENPOINT_MATCH_AUTH_API).permitAll()
 //                .and().authorizeRequests()
                 .antMatchers(Constants.ENPOINT_MATCH_API).permitAll()
                 .antMatchers(Constants.ENPOINT_MATCH_AUTH_API_ACTIVE_USER).permitAll()
-                .anyRequest().permitAll()//can change this to auth
+                .antMatchers(Constants.ENPOINT_UPLOAD).authenticated()
+                .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(jwtLoginRegisterProcessingFilter(),
                         UsernamePasswordAuthenticationFilter.class)

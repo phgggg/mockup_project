@@ -1,4 +1,4 @@
-package com.itsol.mockup.web.dto.image;
+package com.itsol.mockup.web.dto.file;
 
 import lombok.Getter;
 import lombok.Setter;

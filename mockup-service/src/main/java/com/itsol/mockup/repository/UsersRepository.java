@@ -21,4 +21,17 @@ public interface UsersRepository extends JpaRepository<UsersEntity, Long> {
     UsersEntity findUsersEntityByUserName(String userName);
     UsersEntity findUsersEntityByEmail(String email);
     UsersEntity findUsersEntityByUserId(Long id);
+
+    @Query(value = "select u.* " +
+            "from team t\n" +
+            "join users u\n" +
+            "on t.team_id = u.team_id\n" +
+            "where t.team_id = :id",nativeQuery = true)
+    List<UsersEntity> findUserEntitiesByTeamId(Long id);
+
+    @Query(value = "select u.* from team t " +
+            "join team_users tu on t.team_id = tu.team_id " +
+            "join users u on tu.users_id = u.users_id " +
+            "where project_id = :id",nativeQuery = true)
+    List<UsersEntity> findUsersInTeamByProjectId(Long id);
 }

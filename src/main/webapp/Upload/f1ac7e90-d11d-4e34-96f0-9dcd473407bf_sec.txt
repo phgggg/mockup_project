@@ -1,0 +1,1 @@
+the CORS policy determines how scripts served by one origin can request resources on another origin.
