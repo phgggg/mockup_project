@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class JwtAuthenticationLoginRegisterFailureHandler implements AuthenticationFailureHandler {
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public JwtAuthenticationLoginRegisterFailureHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;

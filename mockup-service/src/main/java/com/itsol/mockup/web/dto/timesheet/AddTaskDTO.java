@@ -11,6 +11,6 @@ public class AddTaskDTO extends BaseDTO {
     protected Integer page;
     protected String sort;*/
     private String userName;
-    private TimesheetDTO timesheetDTO;
+    private TimesheetStatusDTO timesheetStatusDTO;
     private Long projectId;
 }

@@ -25,4 +25,8 @@ public class RoleEntity {
     @JsonIgnore
     @ManyToMany(mappedBy = "roles")
     private List<UsersEntity> usersEntities = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "timesheetRole", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TimeSheetEntity> timeSheetEntities = new ArrayList<>();
 }

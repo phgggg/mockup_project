@@ -4,11 +4,9 @@ import com.itsol.mockup.entity.FileEntity;
 import com.itsol.mockup.entity.ProjectEntity;
 import com.itsol.mockup.entity.RoleEntity;
 import com.itsol.mockup.entity.UsersEntity;
-import com.itsol.mockup.repository.FileRepository;
 import com.itsol.mockup.services.FileService;
 import com.itsol.mockup.web.FileStorageException;
 import com.itsol.mockup.web.FileStorageProperties;
-import com.itsol.mockup.web.MyFileNotFoundException;
 import com.itsol.mockup.web.dto.file.FileDTO;
 import com.itsol.mockup.web.dto.file.FileSearchDTO;
 import com.itsol.mockup.web.dto.file.FileShareDTO;
@@ -25,7 +23,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +30,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +39,7 @@ import org.apache.commons.io.FilenameUtils;
 public class FileServiceImpl extends BaseService implements FileService {
     private final Path fileStorageLocation; //Đường dẫn lưu file
 
-    private static String UPLOAD_DIR = "Upload";
+    private static final String UPLOAD_DIR = "Upload";
 
     @Autowired
     public FileServiceImpl(FileStorageProperties fileStorageProperties) {
@@ -253,7 +249,7 @@ public class FileServiceImpl extends BaseService implements FileService {
                 fileToShare.setAllowedUser(allowed);
                 fileToShare.setLastModifiedBy(tokenUtils.getUsernameFromToken(token));
                 fileToShare.setLastModifiedDate(curDate);
-                fileToShare.setProject(projectRepository.getProjectEntityByProjectId(8L));//lỗi
+                fileToShare.setProjectFile(projectRepository.getProjectEntityByProjectId(8L));//lỗi
                 fileRepository.save(fileToShare);
                 String linkdown = "http://" + httpServletRequest.getHeader("host") + "/api/file"+"/downloadFile/"+fileToShare.getFileName();
                 shareStatusDTO = new ShareStatusDTO(fileId,user.getUserId(),curDate, tokenUtils.getUsernameFromToken(token),linkdown);

@@ -18,4 +18,7 @@ public class LevelsEntity {
 
     @Column(name = "level_name")
     private String name;
+
+    @Column(name = "level_value")
+    private Long levelValue;
 }

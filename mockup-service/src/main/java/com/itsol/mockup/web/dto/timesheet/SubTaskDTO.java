@@ -1,5 +1,6 @@
 package com.itsol.mockup.web.dto.timesheet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itsol.mockup.entity.TimeSheetEntity;
 import com.itsol.mockup.entity.UsersEntity;
 import lombok.Getter;
@@ -19,6 +20,8 @@ public class SubTaskDTO {
     private String status;
     private Timestamp detailDate;
     private String comments;
+    @JsonIgnore
     private UsersEntity assignedUser;
+    @JsonIgnore
     private TimeSheetEntity timeSheetEntity;
 }

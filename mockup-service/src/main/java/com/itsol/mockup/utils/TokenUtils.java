@@ -23,7 +23,7 @@ public class TokenUtils {
 
     private final String secret = "secretKey";
 
-    private Long expiration = 3600l;
+    private final Long expiration = 36000L;
 
     public String getUsernameFromToken(String token) {
         String username;

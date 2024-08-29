@@ -1,0 +1,7 @@
+trả về cả list task, list task phân cho user dựa vào kq thuật toán
+tổng hợp trên nhiều user
+
+
+task difficulties...
+mấy task bị lọc ra từ đầu chỉ ra là sao lại lọc(optional)
+thêm 1 dòng AssignedId nhìn cho tiện

@@ -10,7 +10,10 @@ import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.request.auth.AuthRequestDTO;
 import com.itsol.mockup.web.dto.response.*;
 import com.itsol.mockup.web.dto.response.auth.AuthResponseDTO;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetStatusDTO;
+import com.itsol.mockup.web.dto.timesheet.WorkloadResponseDTO;
+import com.itsol.mockup.web.dto.users.UserTaskStatusDTO;
+import com.itsol.mockup.web.dto.users.UserTaskStatusDTO2;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.itsol.mockup.utils.Constants.months;
+import static com.itsol.mockup.utils.Constants.workingHoursPerMonth;
 
 
 @Service
@@ -321,7 +325,7 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                 }catch (Exception tk){
                     logger.info("token error {}",tk.getMessage());
                 }
-                taskToAdd.setUsersEntity(user);
+                taskToAdd.setAssignedUser(user);
                 taskToAdd.setProjectId(projectId);
                 taskToAdd.setCreatedDate(getCurTimestamp());
                 taskToAdd.setStatus(0);
@@ -351,7 +355,7 @@ public class UsersServiceImpl extends BaseService implements UsersService {
             UsersEntity createdBy = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
             logger.info("user lay tu token {}", createdBy.getUserName());
             if(taskToUpd!=null){
-                timeSheetEntity.setUsersEntity(usersEntity);
+                timeSheetEntity.setAssignedUser(usersEntity);
                 timeSheetEntity.setCreatedBy(createdBy.getUserName());
                 timeSheetEntity.setLastUpdate(getCurTimestamp());
                 timeSheetEntity.setProjectId(projectId);
@@ -371,13 +375,13 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     @Override
     public BaseResultDTO getUserTaskStatus(String userName, int month, int page, int pageSize) {
         SingleResultDTO result = new SingleResultDTO<>();
-        UserTaskStatusDTO userTaskStatusDTO;
+        UserTaskStatusDTO2 userTaskStatusDTO;
         try {
             logger.info("khoi tao va truy van du lieu");
             Timestamp currentTimeStamp = getCurTimestamp();
             UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
             List<ProjectEntity> userProjects = projectRepository.getProjectEntitiesByUserId(user.getUserId());
-            List<TimesheetDTO> userTasksTotal = new ArrayList<>();
+            List<TimesheetStatusDTO> userTasksTotal = new ArrayList<>();
             logger.info("{}'s task status in {}", userName, months[month - 1]);
             if (user != null && !userProjects.isEmpty()) {
                 double taskDone = 0, taskOnGoing = 0, monthTaskDoneInTotal = 0, monthTaskOnGoingInTotal = 0, monthTaskPendingInTotal = 0;
@@ -427,7 +431,7 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                 + Math.round(monthTaskDoneInTotal*100)    + "% tasks done\n"
                 + Math.round(monthTaskOnGoingInTotal*100) + "% tasks ongoing\n"
                 + Math.round(monthTaskPendingInTotal*100) + "% tasks pending\n";
-                List<TimesheetDTO> userTasksTotalPage = null;
+                List<TimesheetStatusDTO> userTasksTotalPage = null;
                 try{
                     userTasksTotalPage = userTasksTotal.subList(page*pageSize,(page+1)*pageSize);
                 }catch (Exception ee){
@@ -439,27 +443,35 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                     }
                 }
 
-                userTaskStatusDTO = new UserTaskStatusDTO(modelMapper.map(user, UsersDTO.class), userTasksTotalPage,
+                SingleResultDTO currentUserWorkload = (SingleResultDTO) timesheetService.monthlyWorkloadTrackingByUser(user.getUserName(), month);
+                WorkloadResponseDTO response = (WorkloadResponseDTO) currentUserWorkload.getData();
+
+                userTaskStatusDTO = new UserTaskStatusDTO2(modelMapper.map(user, UsersDTO.class), userTasksTotalPage,
                         taskDone, taskOnGoing, taskPending,
                         daysUntilNearestDeadline, currentTimeStamp,
                         monthTaskDoneInTotal, monthTaskOnGoingInTotal, monthTaskPendingInTotal,
                         taskPercentInMonth[0], taskPercentInMonth[1], taskPercentInMonth[2],
                         totalTaskCountInMonth, description, ""
                 );
-
+                userTaskStatusDTO.setWorkloadStatus(response.getTotalWorkloadStatus());
+                userTaskStatusDTO.setWorkload((double) Math.round((float) (100 * response.getTotalWorkingTimeRemains()) /workingHoursPerMonth)/100);
                 result.setSuccess(userTaskStatusDTO);
 
                 logger.info("export to excel: ");
                 Sheet sheet = excelUtil.sheetCreate("user task status", userTaskStatusDTO);
                 excelUtil.sheetWriteSingleData(sheet, userTaskStatusDTO);
                 logger.info("create sheet task status");
-                Sheet taskStatusSheet = excelUtil.sheetCreate("taskStatusByUser", new TimesheetDTO());
+                Sheet taskStatusSheet = excelUtil.sheetCreate("taskStatusByUser", new TimesheetStatusDTO());
                 logger.info("write into task status");
-                excelUtil.sheetWriteListData(taskStatusSheet, userTasksTotal);
+                try{
+                    excelUtil.sheetWriteListData(taskStatusSheet, userTasksTotal);
+                }catch (Exception ee){
+                    logger.info("Khong co task");
+                }
                 logger.info("out");
                 excelUtil.out("result");
 
-                logger.info("{}",description);
+                logger.info("user task status {}",description);
             }
         }
         catch (Exception e) {
@@ -479,8 +491,8 @@ public class UsersServiceImpl extends BaseService implements UsersService {
             String taskCommTmp2 = "";
             Timestamp currentTimeStamp = getCurTimestamp();
             UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
-            List<TimeSheetEntity> userTasksByProject = timesheetRepository.findTimeSheetEntitiesByUserIdAndProjectId(user.getUserId(), projectId);
-            List<TimesheetDTO> userTasksByProjectDTO = new ArrayList<>();
+            List<TimeSheetEntity> userTasksByProject = timesheetRepository.findTimeSheetEntitiesByUsersEntityAndProjectId(user.getUserId(), projectId);
+            List<TimesheetStatusDTO> userTasksByProjectDTO = new ArrayList<>();
             ProjectEntity currentPrj = projectRepository.getProjectEntityByProjectId(projectId);
             logger.info("{} task status of project {}", months[month - 1], currentPrj.getProjectName());
             if (user != null) {
@@ -504,12 +516,14 @@ public class UsersServiceImpl extends BaseService implements UsersService {
 
                     if(
                             DataUtils.getMonthFromTimestamp(timesheetObj.getLastUpdate()) == month ||
-                            DataUtils.getMonthFromTimestamp(timesheetObj.getActualFinishDate()) == month
+                            DataUtils.getMonthFromTimestamp(timesheetObj.getActualFinishDate()) == month ||
+                            DataUtils.getMonthFromTimestamp(timesheetObj.getFinishDateExpected()) == month
                     ){
                         totalTaskInMonth++;
                         Date taskCreateDate = timesheetObj.getStartDateExpected();
                         daysTotal = (int) DataUtils.dayDiff(deadline, taskCreateDate);
                         daysLeft =  (int) DataUtils.dayDiff(deadline, currentDate);
+                        logger.info("days left : {}", daysLeft);
                         if(daysLeft < daysUntilNearestDeadline) daysUntilNearestDeadline = daysLeft;
 
                         description+= "Task " + timesheetObj.getTask() + "(" + daysTotal + " days)" + " status: ";
@@ -525,9 +539,9 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                         String[] taskComment = splitInfo(taskCommTmp2);
                         description+= ", " + daysLeft + " days until deadline\n";
 
-                        TimesheetDTO add = modelMapper.map(timesheetObj, TimesheetDTO.class);
+                        TimesheetStatusDTO add = modelMapper.map(timesheetObj, TimesheetStatusDTO.class);
                         add.setDaysLeft((long) daysLeft);
-                        add.setProgressByTime((double) ((int) ((daysTotal-daysLeft) * 100 / daysTotal)) /100);
+                        add.setProgressByTime((double) ((daysTotal-daysLeft) * 100 / daysTotal) /100);
 
                         add.setDescription(taskCommTmp);
                         add.setTaskComment(taskComment);
@@ -569,13 +583,13 @@ public class UsersServiceImpl extends BaseService implements UsersService {
                             +Math.round(monthTaskOnGoingInTotal*100) + "% tasks on going\n"
                             +Math.round(monthTaskPendingInTotal*100) + "% tasks pending\n";
 
-                List<TimesheetDTO> userTasksByProjectDTOPage = null;
+                List<TimesheetStatusDTO> userTasksByProjectDTOPage = null;
                 try{
                     userTasksByProjectDTOPage = userTasksByProjectDTO.subList(page*pageSize,(page+1)*pageSize);
                 }
                 catch (Exception e){
                     userTasksByProjectDTOPage = userTasksByProjectDTO;
-                    logger.info(e.getMessage());
+                    logger.info(e.getMessage() + " get full list instead " );//+ userTasksByProjectDTOPage.get(0).getTask()
                 }
 
                 userTaskStatusDTO = new UserTaskStatusDTO(modelMapper.map(user, UsersDTO.class), userTasksByProjectDTOPage,
@@ -590,7 +604,7 @@ public class UsersServiceImpl extends BaseService implements UsersService {
             }
         }
         catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("user task status by project id {}", e.getMessage(), e);
             result.setFail(e.getMessage());
         }
         return result;

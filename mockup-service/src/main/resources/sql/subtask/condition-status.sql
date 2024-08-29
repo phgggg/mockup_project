@@ -1,0 +1,1 @@
+AND (st.status = 'done' or t.status = 2)

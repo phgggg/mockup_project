@@ -90,7 +90,7 @@ public class UsersEntity {
     private List<NewEntity> news = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "usersEntity")
+    @OneToMany(mappedBy = "assignedUser")
     private List<TimeSheetEntity> timeSheets = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
@@ -99,6 +99,10 @@ public class UsersEntity {
     @JsonIgnore
     @ManyToMany(mappedBy = "usersEntities")
     private List<TeamEntity> teamEntityList = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "RISK_FROM_USER_ID")
+    private RiskFromUserEntity riskFromUser;
 
     @Override
     public String toString() {

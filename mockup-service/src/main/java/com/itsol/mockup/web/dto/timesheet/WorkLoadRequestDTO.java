@@ -6,5 +6,5 @@ import java.sql.Timestamp;
 @Getter
 public class WorkLoadRequestDTO {
     private String userName;
-    private Timestamp timestamp;
+    private int month;
 }

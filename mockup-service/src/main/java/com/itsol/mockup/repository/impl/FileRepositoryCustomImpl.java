@@ -42,10 +42,9 @@ public class FileRepositoryCustomImpl extends BaseRepo implements FileRepository
         session.beginTransaction();
 
         try{
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_FILE, "select-file"));
-            sb.append(" AND MATCH(f.actual_name) AGAINST(:key in boolean mode)");
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_FILE, "select-file") +
+                    " AND MATCH(f.actual_name) AGAINST(:key in boolean mode)";
+            SQLQuery query = session.createSQLQuery(sb);
 
 
             if (!DataUtils.isNullOrEmpty(fileSearchDTO.getKeyword())) {

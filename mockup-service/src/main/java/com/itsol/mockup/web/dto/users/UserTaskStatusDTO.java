@@ -1,7 +1,6 @@
-package com.itsol.mockup.web.dto.response;
+package com.itsol.mockup.web.dto.users;
 
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
-import com.itsol.mockup.web.dto.users.UsersDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetStatusDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.List;
 @Getter
 @Setter
-public class UserTaskStatusDTO{
+public class UserTaskStatusDTO {
     private UsersDTO user;
     private Timestamp requestDate;
     private String requestBy;
@@ -23,9 +22,11 @@ public class UserTaskStatusDTO{
     private double monthTaskDoneInMonth;
     private double monthTaskOnGoingInMonth;
     private double monthTaskPendingInMonth;
-    private List<TimesheetDTO> tasks;
+    private List<TimesheetStatusDTO> tasks;
     private int taskTotal;
     private String statusInfo;
+
+
 //    private double monthTaskDoneInMonthCount;
 //    private double monthTaskOnGoingInMonthCount;
 //    private double monthTaskPendingInMonthCount;
@@ -39,7 +40,7 @@ public class UserTaskStatusDTO{
         this.requestDate = currentTimestamp;
     }
 
-    public UserTaskStatusDTO(UsersDTO user, List<TimesheetDTO> tasksStatus,
+    public UserTaskStatusDTO(UsersDTO user, List<TimesheetStatusDTO> tasksStatus,
                              double taskDone, double taskOngoing, double taskPending,
                              long daysLeft, Timestamp currentTimestamp,
                              double monthTaskDoneInTotal, double monthTaskOnGoingInTotal, double monthTaskPendingInTotal,
@@ -59,7 +60,7 @@ public class UserTaskStatusDTO{
         this.requestBy = requestBy;
     }
 
-    public UserTaskStatusDTO(UsersDTO user, List<TimesheetDTO> tasksStatus,
+    public UserTaskStatusDTO(UsersDTO user, List<TimesheetStatusDTO> tasksStatus,
                              double taskDone, double taskOngoing, double taskPending,
                              long daysLeft, Timestamp currentTimestamp,
                              double monthTaskDoneInTotal, double monthTaskOnGoingInTotal, double monthTaskPendingInTotal,
@@ -83,7 +84,7 @@ public class UserTaskStatusDTO{
         this.requestBy = requestBy;
     }
 
-//    public UserTaskStatusDTO(UsersDTO user, List<TimesheetDTO> tasksStatus,
+    //    public UserTaskStatusDTO(UsersDTO user, List<TimesheetDTO> tasksStatus,
 //                             double taskDone, double taskOngoing, double taskPending,
 //                             long daysLeft, Timestamp currentTimestamp,
 //                             double monthTaskDoneInTotal, double monthTaskOnGoingInTotal, double monthTaskPendingInTotal,

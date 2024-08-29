@@ -1,6 +1,7 @@
 package com.itsol.mockup.web.dto.project;
 
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetStatusDTO;
+import com.itsol.mockup.web.dto.users.UsersDTO2;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +25,8 @@ public class ProjectStatusDTO {
     private double monthTaskDoneInMonth;
     private double monthTaskOnGoingInMonth;
     private double monthTaskToDoInMonth;
-    private List<TimesheetDTO> tasksStatus;
+    private List<UsersDTO2> userList;
+    private List<TimesheetStatusDTO> tasksStatus;
     private String statusInfo;
 
     public ProjectStatusDTO(ProjectDTO projectDTO) {
@@ -39,7 +41,7 @@ public class ProjectStatusDTO {
         this.daysLeft = daysLeft;
     }
 
-    public ProjectStatusDTO(List<TimesheetDTO> tasksStatus, double taskDone, double taskOngoing, double taskToDo, long daysLeft) {
+    public ProjectStatusDTO(List<TimesheetStatusDTO> tasksStatus, double taskDone, double taskOngoing, double taskToDo, long daysLeft) {
 
         this.tasksStatus = tasksStatus;
         this.taskDone = taskDone;

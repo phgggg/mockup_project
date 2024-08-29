@@ -1,8 +1,5 @@
 package com.itsol.mockup.utils;
 
-import com.itsol.mockup.web.dto.response.ResultDTO;
-import org.springframework.data.domain.Page;
-
 public interface Constants {
 //    public interface ApiErrorCode {
 //        String ERROR = "01";
@@ -51,8 +48,8 @@ public interface Constants {
             "November",
             "December"
     };
-    long workingTimePerWeek = 40L;
-    long workingTimePerMonth = 160L;
+    long workingHoursPerWeek = 40L;
+    long workingHoursPerMonth = 160L;
 //    public ResultDTO pageToObj (Page<Object> page) {
 //        ResultDTO resultDTO = new ResultDTO();
 //        if(page != null) {

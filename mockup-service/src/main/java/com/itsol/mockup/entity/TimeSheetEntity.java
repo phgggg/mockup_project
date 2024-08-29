@@ -4,9 +4,12 @@ package com.itsol.mockup.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -66,11 +69,29 @@ public class TimeSheetEntity {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "USERS_ID")
-    private UsersEntity usersEntity;
+    private UsersEntity assignedUser;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "OLD_USERS_ID")
+    private UsersEntity oldAssignedUser;
 
     @JsonIgnore
     @OneToMany(mappedBy = "timeSheetEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SubTaskEntity> subTasks;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "ROLE_ID")
+    private RoleEntity timesheetRole ;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
+    @JoinTable(name = "timesheet_risk",
+            joinColumns = @JoinColumn(name = "timesheet_id"),
+            inverseJoinColumns = @JoinColumn(name = "id")
+    )
+    private List<RiskDTO> timesheetRisk = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -88,7 +109,7 @@ public class TimeSheetEntity {
                 ", projectId=" + projectId +
                 ", addByUser=" + createdBy +
                 ", lastUpdate=" + lastUpdate +
-                ", assignedUser=" + usersEntity +
+                ", assignedUser=" + assignedUser +
                 ", taskDetails=" + subTasks +
                 '}';
     }

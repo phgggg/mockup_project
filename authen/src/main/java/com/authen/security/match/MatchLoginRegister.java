@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MatchLoginRegister implements RequestMatcher {
-    private OrRequestMatcher orRequestMatcher;
+    private final OrRequestMatcher orRequestMatcher;
 
     public MatchLoginRegister(List<String> matchs) {
         List<RequestMatcher> antPathMatchers = matchs.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList());

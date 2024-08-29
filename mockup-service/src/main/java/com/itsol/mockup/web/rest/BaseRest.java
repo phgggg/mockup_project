@@ -1,7 +1,7 @@
 package com.itsol.mockup.web.rest;
 
 import com.itsol.mockup.entity.TimeSheetEntity;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetStatusDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,9 @@ public class BaseRest {
         token = token.substring(1, token.length() - 1);
         return token;
     }
-    protected TimeSheetEntity convertToEntity(TimesheetDTO timesheetDTO) throws ParseException {
+    protected TimeSheetEntity convertToEntity(TimesheetStatusDTO timesheetStatusDTO) throws ParseException {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetDTO, TimeSheetEntity.class);
+        TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetStatusDTO, TimeSheetEntity.class);
         System.out.println(timeSheetEntity.toString());
 //        if (timesheetDTO.getTimesheetId() != null) {
 //            TimeSheetEntity oldTimeSheet = postService.getPostById(timesheetDTO.getTimesheetId());

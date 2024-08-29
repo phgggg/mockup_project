@@ -1,0 +1,10 @@
+2. Tối Ưu Hóa Phân Công Công Việc
+Mô tả:
+Phát triển một hệ thống quản lý dự án với tính năng tối ưu hóa phân công công việc cho các thành viên trong nhóm dựa trên kỹ năng, kinh nghiệm và tải công việc hiện tại.
+
+Yêu cầu:
+
+- Quản lý kỹ năng nhân viên: Lưu trữ và quản lý thông tin về kỹ năng, kinh nghiệm của từng thành viên trong nhóm.
+- Theo dõi tải công việc: Theo dõi khối lượng công việc hiện tại của từng thành viên để tránh tình trạng quá tải.
+- Tối ưu hóa phân công: Sử dụng thuật toán tối ưu (như Genetic Algorithm, Linear Programming) để phân công công việc sao cho hiệu quả nhất, đồng thời đảm bảo không có thành viên nào bị quá tải.
+- Điều chỉnh phân công: Cung cấp khả năng điều chỉnh phân công công việc khi có sự thay đổi trong dự án.

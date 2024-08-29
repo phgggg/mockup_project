@@ -49,7 +49,7 @@ public class ExcelUtil {
 
         CellStyle style = createStyleHeader(workbook);
 
-        Field[] fields = o.getClass().getDeclaredFields();
+        Field[] fields = getAllFields(o.getClass()).toArray(new Field[0]);
         int i = 1;
         createHeader(header,style,0,"Index");
         for(Field f : fields){
@@ -63,9 +63,25 @@ public class ExcelUtil {
         return sheet;
     }
 
+    public List<Field> getAllFields(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+
+        // Lặp qua các class từ class hiện tại đến superclass
+        while (clazz != null) {
+            // Lấy tất cả các fields được khai báo trong class hiện tại
+            for (Field field : clazz.getDeclaredFields()) {
+                fields.add(field);
+            }
+            // Chuyển sang superclass
+            clazz = clazz.getSuperclass();
+        }
+
+        return fields;
+    }
+
     public void sheetWriteListData(Sheet sheet, List<?> list){
         List<Object> values;
-        Field[] fields = list.get(0).getClass().getDeclaredFields();
+        Field[] fields = getAllFields(list.get(0).getClass()).toArray(new Field[0]);
         int k = 1;
         CellStyle style;
         for(Object dto : list){
@@ -98,7 +114,8 @@ public class ExcelUtil {
 
     public void sheetWriteSingleData(Sheet sheet, Object obj){
         List<Object> values;
-        Field[] fields = obj.getClass().getDeclaredFields();
+        Field[] fields = getAllFields(obj.getClass()).toArray(new Field[0]);
+        logger.info("number of fields: " + fields.length);
         logger.info("class {}", obj.getClass());
         values = new ArrayList<>();
         for (Field field : fields) {

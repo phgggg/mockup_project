@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class WorkloadResponseDTO {
     private Long totalWorkingTimeEstimated;
-    private Long totalWorkingTimeToDo;
+    private Long totalWorkingTimeRemains;
     private Long totalWorkingTimeSpent;
     private Long totalWorkingTimeSpentPerTaskDone;
     private Integer totalWorkloadStatus;

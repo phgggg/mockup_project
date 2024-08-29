@@ -10,7 +10,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import java.util.List;
 
 public class JwtAuthenticationRegister extends AbstractAuthenticationToken {
-    private JwtUserDetails jwtUserDetails;
+    private final JwtUserDetails jwtUserDetails;
     private String password;
     private String email;
     private String phone;

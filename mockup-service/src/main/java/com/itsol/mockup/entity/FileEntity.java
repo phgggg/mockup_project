@@ -66,10 +66,10 @@ public class FileEntity {
     @Column(name= "NEXT_URL")
     private String nextUrl;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "PROJECT_ID")
-    @JsonIgnore
-    private ProjectEntity project;
+    private ProjectEntity projectFile;
 
     public FileEntity() {
     }
@@ -84,7 +84,7 @@ public class FileEntity {
                       String uploadedBy, Timestamp uploadedDate,
                       ArrayList<Long> allowedUser,
                       String lastModifiedBy, Timestamp lastModifiedDate,
-                      ProjectEntity project) {
+                      ProjectEntity projectFile) {
         this.actualName = actualName;
         this.fileName = fileName;
         this.fileTypeList = fileTypeList;
@@ -95,6 +95,6 @@ public class FileEntity {
         this.allowedUser = allowedUser;
         this.lastModifiedBy = lastModifiedBy;
         this.lastModifiedDate = lastModifiedDate;
-        this.project = project;
+        this.projectFile = projectFile;
     }
 }

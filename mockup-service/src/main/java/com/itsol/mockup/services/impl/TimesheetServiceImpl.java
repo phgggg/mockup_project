@@ -1,32 +1,25 @@
 package com.itsol.mockup.services.impl;
 
-import com.itsol.mockup.entity.ProjectEntity;
-import com.itsol.mockup.entity.SubTaskEntity;
-import com.itsol.mockup.entity.TimeSheetEntity;
-import com.itsol.mockup.entity.UsersEntity;
+import com.itsol.mockup.entity.*;
 import com.itsol.mockup.repository.SubTaskRepositoryCustom;
 import com.itsol.mockup.services.TimesheetService;
-import com.itsol.mockup.utils.Constants;
 import com.itsol.mockup.utils.DataUtils;
 import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.response.SingleResultDTO;
-import com.itsol.mockup.web.dto.timesheet.SubTaskDTO;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
-import com.itsol.mockup.web.dto.timesheet.WorkloadResponseDTO;
+import com.itsol.mockup.web.dto.timesheet.*;
+import com.itsol.mockup.web.dto.users.UsersDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.itsol.mockup.utils.Constants.*;
-import static com.itsol.mockup.utils.GeneticAlgorithm.geneticAlgorithm;
+import static com.itsol.mockup.utils.GeneticAlgorithm.*;
 
 /**
  *
@@ -40,14 +33,14 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
     @Override
     public BaseResultDTO findAll(Integer pageSize, Integer page) {
         logger.info("=== START FIND ALL TIMESHEET::");
-        ArrayResultDTO arrayResultDTO = new ArrayResultDTO<>();
+        ArrayResultDTO<Object> arrayResultDTO = new ArrayResultDTO<>();
         try {
-            List<TimesheetDTO> lstResult = new ArrayList<>();
+            List<Object> lstResult = new ArrayList<>();
             Page<TimeSheetEntity> rawsData = timesheetRepository.findAll(PageRequest.of(page - 1, pageSize));
             if (rawsData != null) {
                 if (rawsData.getContent().size() > 0) {
                     rawsData.getContent().forEach(i -> {
-                        TimesheetDTO dto = modelMapper.map(i, TimesheetDTO.class);
+                        TimesheetStatusDTO dto = modelMapper.map(i, TimesheetStatusDTO.class);
                         lstResult.add(dto);
                     });
                 }
@@ -63,17 +56,17 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
     }
 
     @Override
-    public BaseResultDTO addTimesheet(TimesheetDTO timesheetDTO, String token) {
+    public BaseResultDTO addTimesheet(TimesheetStatusDTO timesheetStatusDTO, String token) {
         logger.info("ADD NEW TIMESHEET");
         SingleResultDTO singleResultDTO = new SingleResultDTO();
-        ProjectEntity projectEntity = projectRepository.getProjectEntityByProjectId(timesheetDTO.getProjectId());
+        ProjectEntity projectEntity = projectRepository.getProjectEntityByProjectId(timesheetStatusDTO.getProjectId());
         UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
         try {
-            if(projectEntity.getDeadline().before(timesheetDTO.getFinishDateExpected())){
-                timesheetDTO.setCreatedDate(getCurTimestamp());
-                timesheetDTO.setStatus(0);
-                TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetDTO, TimeSheetEntity.class);
-                timeSheetEntity.setUsersEntity(usersEntity);
+            if(projectEntity.getDeadline().before(timesheetStatusDTO.getFinishDateExpected())){
+                timesheetStatusDTO.setCreatedDate(getCurTimestamp());
+                timesheetStatusDTO.setStatus(0);
+                TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetStatusDTO, TimeSheetEntity.class);
+                timeSheetEntity.setAssignedUser(usersEntity);
                 timeSheetEntity = timesheetRepository.save(timeSheetEntity);
                 singleResultDTO.setSuccess(timeSheetEntity);
             }else {
@@ -88,13 +81,13 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
     }
 
     @Override
-    public BaseResultDTO updateTimesheet(TimesheetDTO timesheetDTO) {
+    public BaseResultDTO updateTimesheet(TimesheetStatusDTO timesheetStatusDTO) {
         logger.info("UPDATE TIMESHEET");
         SingleResultDTO singleResultDTO = new SingleResultDTO();
         try {
-            TimeSheetEntity timeSheetEntity = timesheetRepository.getTimeSheetEntityByTimesheetId(timesheetDTO.getTimesheetId());
+            TimeSheetEntity timeSheetEntity = timesheetRepository.getTimeSheetEntityByTimesheetId(timesheetStatusDTO.getTimesheetId());
             if (timeSheetEntity.getTimesheetId() != null) {
-                timeSheetEntity = modelMapper.map(timesheetDTO, TimeSheetEntity.class);
+                timeSheetEntity = modelMapper.map(timesheetStatusDTO, TimeSheetEntity.class);
                 timesheetRepository.save(timeSheetEntity);
                 singleResultDTO.setSuccess(timeSheetEntity);
             }
@@ -124,16 +117,16 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
 
     @Override
     public BaseResultDTO searchTimesheetByUser(String token, Integer pageSize, Integer page) {
-        ArrayResultDTO<TimesheetDTO> arrayResultDTO = new ArrayResultDTO<>();
-        List<TimesheetDTO> list = new ArrayList<>();
+        ArrayResultDTO<TimesheetStatusDTO> arrayResultDTO = new ArrayResultDTO<>();
+        List<TimesheetStatusDTO> list = new ArrayList<>();
         try {
             UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
-            Page<TimeSheetEntity> rawData = timesheetRepository.findTimeSheetEntitiesByUsersEntity(usersEntity, PageRequest.of(page, pageSize));
+            Page<TimeSheetEntity> rawData = timesheetRepository.findTimeSheetEntitiesByAssignedUser(usersEntity, PageRequest.of(page, pageSize));
         if (rawData != null){
             if(rawData.getContent().size() > 0){
                 rawData.getContent().forEach(timeSheetEntity -> {
-                    TimesheetDTO timesheetDTO = modelMapper.map(timeSheetEntity, TimesheetDTO.class);
-                    list.add(timesheetDTO);
+                    TimesheetStatusDTO timesheetStatusDTO = modelMapper.map(timeSheetEntity, TimesheetStatusDTO.class);
+                    list.add(timesheetStatusDTO);
                 });
             }
             arrayResultDTO.setSuccess(list, rawData.getTotalElements(), rawData.getTotalPages());
@@ -201,17 +194,17 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
         SingleResultDTO singleResultDTO = new SingleResultDTO();
         TimeSheetEntity timeSheetEntity = timesheetRepository.getTimeSheetEntityByTimesheetId(timeSheetId);
 //        UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(userName);
-        UsersEntity usersEntity = timeSheetEntity.getUsersEntity();
+        UsersEntity usersEntity = timeSheetEntity.getAssignedUser();
         try {
             if(usersEntity!=null){
                 SubTaskEntity subTask = modelMapper.map(subTaskDTO, SubTaskEntity.class);
-                SingleResultDTO weeklyWorkload = (SingleResultDTO) weeklyWorkloadTrackingByUser(userName,timeSheetEntity.getFinishDateExpected());
-                WorkloadResponseDTO responseDTO = (WorkloadResponseDTO) weeklyWorkload.getData();
-                long userWorkloadInWeek = (long) (responseDTO.getTotalWorkingTimeToDo() + subTask.getEstimatedHours());
-                //TODO xem p này có thể thêm gì vào
-                if(userWorkloadInWeek >= workingTimePerWeek*1.1){
+                int month = DataUtils.getMonthFromTimestamp(timeSheetEntity.getFinishDateExpected());
+                SingleResultDTO monthlyWorkload = (SingleResultDTO) monthlyWorkloadTrackingByUser(userName, month);
+                WorkloadResponseDTO responseDTO = (WorkloadResponseDTO) monthlyWorkload.getData();
+                long userWorkloadInWeek = (long) (responseDTO.getTotalWorkingTimeRemains() + subTask.getEstimatedHours());
+                if(userWorkloadInWeek >= workingHoursPerMonth *1.1){
                     logger.info("Quá tải");
-                    singleResultDTO.setFail("overload");
+                    singleResultDTO.setFail("overwork");
                 }else {
                     subTask.setLastUpdated(getCurTimestamp());
                     subTask.setUpdatedBy("");
@@ -231,137 +224,108 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
         return singleResultDTO;
     }
 
-    @Override
-    public BaseResultDTO weeklyWorkloadTrackingByUser(String userName, Timestamp timestamp) {
-        SingleResultDTO result = new SingleResultDTO<>();
-        Timestamp mon = DataUtils.getDayOfWeek(timestamp, DayOfWeek.MONDAY);
-        Timestamp sat = DataUtils.getDayOfWeek(timestamp, DayOfWeek.SATURDAY);
-        logger.info("t2 la {} t7 la {}", mon, sat);
-        logger.info("get user and user tasks");
-        UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
-        Long totalWorkingTimeEstimated= 0L, totalWorkingTimeSpent = 0L, totalWorkingTimeSpentPerTaskDone = 0L;
-        Long totalWorkingTimeToDo;
-        int totalWorkloadStatus;
-        double actualProgressByTime;
-        logger.info("get estimated working hours");
-
-        try{
-            totalWorkingTimeEstimated += subTaskRepositoryCustom.getSumOfEstimatedHoursByUserId(user.getUserId(),mon,sat);
-        }catch (Exception e){
-            logger.info(e.getMessage());
-        }
-        try{
-            totalWorkingTimeSpent += subTaskRepositoryCustom.getSumOfHoursSpentByUserId(user.getUserId(),mon,sat);
-        }catch (Exception e){
-            logger.info(e.getMessage());
-        }
-        try{
-            totalWorkingTimeSpentPerTaskDone += subTaskRepositoryCustom.getSumOfHoursSpentPerTaskDoneByUserId(user.getUserId(),mon,sat);
-        }catch (Exception e){
-            logger.info(e.getMessage());
-        }
-
-        logger.info("total working time estimated           = {}", totalWorkingTimeEstimated);
-        logger.info("total working time spent               = {}", totalWorkingTimeSpent);
-        logger.info("total working time spent per task done = {}", totalWorkingTimeSpentPerTaskDone);
-        actualProgressByTime = (double) Math.round((float) (100 * totalWorkingTimeSpent) / totalWorkingTimeEstimated) /100;
-//        if(totalWorkingTimeSpent > totalWorkingTimeSpentPerTaskDone){
-//            logger.info("Slower than expected");
+//    @Override
+//    public BaseResultDTO weeklyWorkloadTrackingByUser(String userName, Timestamp timestamp) {
+//        SingleResultDTO<Object> result = new SingleResultDTO<>();
+//        Timestamp mon = DataUtils.getDayOfWeek(timestamp, DayOfWeek.MONDAY);
+//        Timestamp sat = DataUtils.getDayOfWeek(timestamp, DayOfWeek.SATURDAY);
+//        logger.info("t2 la {} t7 la {}", mon, sat);
+//        logger.info("get user and user tasks");
+//        UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
+//        Long totalWorkingTimeEstimated= 0L, totalWorkingTimeSpent = 0L, totalWorkingTimeSpentPerTaskDone = 0L;
+//        logger.info("get estimated working hours");
 //
+//        try{
+//            totalWorkingTimeEstimated = subTaskRepositoryCustom.getSumOfEstimatedHoursByUserId(user.getUserId(),mon,sat);
+//            totalWorkingTimeSpent = subTaskRepositoryCustom.getSumOfHoursSpentByUserId(user.getUserId(),mon,sat);
+//            totalWorkingTimeSpentPerTaskDone = subTaskRepositoryCustom.getSumOfHoursSpentPerTaskDoneByUserId(user.getUserId(),mon,sat);
+//        }catch (Exception e){
+//            logger.info(e.getMessage());
 //        }
-        logger.info("working time to do                     = {}", totalWorkingTimeEstimated - totalWorkingTimeSpent);
-        totalWorkingTimeToDo = (totalWorkingTimeEstimated - totalWorkingTimeSpent);
-        totalWorkloadStatus = (totalWorkingTimeEstimated < workingTimePerWeek*0.9) ? 1 :
-                                (totalWorkingTimeEstimated > workingTimePerWeek*1.1) ? -1 : 0;
-        String cmt = (totalWorkloadStatus == -1) ? " more than" : (totalWorkloadStatus == 1) ? " less than" : "";
-        logger.info("Total workload is{} expected", cmt);
-        if(totalWorkloadStatus==-1) logger.info("should be {} hours less", totalWorkingTimeEstimated-workingTimePerWeek);
-        WorkloadResponseDTO response = new WorkloadResponseDTO
-                (
-                        totalWorkingTimeEstimated, totalWorkingTimeToDo, totalWorkingTimeSpent, totalWorkingTimeSpentPerTaskDone,
-                        totalWorkloadStatus, actualProgressByTime, getCurTimestamp()
-                );
-
-        result.setSuccess(response);
-        return result;
-    }
+//        logger.info("weekly workload tracking");
+//        WorkloadResponseDTO response = workloadCalc(workingHoursPerWeek, totalWorkingTimeEstimated,totalWorkingTimeSpent,totalWorkingTimeSpentPerTaskDone);
+//
+//        result.setSuccess(response);
+//        return result;
+//    }
 
     @Override
-    public BaseResultDTO monthlyWorkloadTrackingByUser(String userName, Timestamp timestamp) {
-        SingleResultDTO result = new SingleResultDTO<>();
-        int month = DataUtils.getMonthFromTimestamp(timestamp);
+    public BaseResultDTO monthlyWorkloadTrackingByUser(String userName, int month) {
+        SingleResultDTO<Object> result = new SingleResultDTO<>();
         int year = 2024;
         logger.info("Workload tracking for {}, year {}", months[month-1], year);
-        logger.info("get user and user tasks");
+        logger.info("get month user and user tasks");
         UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
         Long totalWorkingTimeEstimated= 0L, totalWorkingTimeSpent = 0L, totalWorkingTimeSpentPerTaskDone = 0L;
-        Long totalWorkingTimeToDo;
-        int totalWorkloadStatus;
-        double actualProgressByTime;
         logger.info("get monthly estimated working hours");
-
         try{
-            totalWorkingTimeEstimated += subTaskRepositoryCustom.getSumOfMonthlyEstimatedHoursByUserId(user.getUserId(),month,year);
+            totalWorkingTimeEstimated = subTaskRepositoryCustom.getSumOfMonthlyEstimatedHoursByUserId(user.getUserId(),month,year);
+            totalWorkingTimeSpent = subTaskRepositoryCustom.getSumOfMonthlyHoursSpentByUserId(user.getUserId(),month,year);
+            totalWorkingTimeSpentPerTaskDone = subTaskRepositoryCustom.getSumOfMonthlyHoursSpentPerTaskDoneByUserId(user.getUserId(),month,year);
         }catch (Exception e){
             logger.info(e.getMessage());
         }
-        try{
-            totalWorkingTimeSpent += subTaskRepositoryCustom.getSumOfMonthlyHoursSpentByUserId(user.getUserId(),month,year);
-        }catch (Exception e){
-            logger.info(e.getMessage());
-        }
-        try{
-            totalWorkingTimeSpentPerTaskDone += subTaskRepositoryCustom.getSumOfMonthlyHoursSpentPerTaskDoneByUserId(user.getUserId(),month,year);
-        }catch (Exception e){
-            logger.info(e.getMessage());
-        }
-
-        logger.info("total working time estimated monthly           = {}", totalWorkingTimeEstimated);
-        logger.info("total working time spent monthly               = {}", totalWorkingTimeSpent);
-        logger.info("total working time spent per task done monthly = {}", totalWorkingTimeSpentPerTaskDone);
-        actualProgressByTime = (double) Math.round((float) (100 * totalWorkingTimeSpent) / totalWorkingTimeEstimated) /100;
-        logger.info("working time to do monthly                     = {}", totalWorkingTimeEstimated - totalWorkingTimeSpent);
-        totalWorkingTimeToDo = (totalWorkingTimeEstimated - totalWorkingTimeSpent);
-        totalWorkloadStatus = (totalWorkingTimeEstimated < workingTimePerMonth*0.9) ? 1 :
-                (totalWorkingTimeEstimated > workingTimePerMonth*1.1) ? -1 : 0;
-        String cmt = (totalWorkloadStatus == -1) ? " more than" : (totalWorkloadStatus == 1) ? " less than" : "";
-        logger.info("Total monthly workload is{} expected", cmt);
-        if(totalWorkloadStatus==-1) logger.info("should be {} hours less monthly", totalWorkingTimeEstimated-workingTimePerWeek);
-        WorkloadResponseDTO response = new WorkloadResponseDTO
-                (
-                        totalWorkingTimeEstimated, totalWorkingTimeToDo, totalWorkingTimeSpent, totalWorkingTimeSpentPerTaskDone,
-                        totalWorkloadStatus, actualProgressByTime, getCurTimestamp()
-                );
+        logger.info("monthly workload tracking");
+        WorkloadResponseDTO response = workloadCalc(workingHoursPerMonth, totalWorkingTimeEstimated, totalWorkingTimeSpent, totalWorkingTimeSpentPerTaskDone);
 
         result.setSuccess(response);
         return result;
     }
 
-    //assign task based on project id
-    @Override
-    public BaseResultDTO optimizedSubTaskAssignmentByProjectId(Long id, Timestamp ts) {
-        SingleResultDTO result = new SingleResultDTO<>();
-        try {
-            ProjectEntity project = projectRepository.getProjectEntityByProjectId(id);
-            List<UsersEntity> users = usersRepository.findUsersInTeamByProjectId(id);
-            int subTaskCount = Math.toIntExact(subTaskRepository.getSubTaskCountByProjectId(id));
-            List<SubTaskEntity> subTaskEntities = subTaskRepository.getSubTaskByProjectId(id);//subtask
+    private WorkloadResponseDTO workloadCalc(long workingHours ,Long totalWorkingTimeEstimated, Long totalWorkingTimeSpent, Long totalWorkingTimeSpentPerTaskDone){
+        long totalWorkingTimeToDo;
+        int totalWorkloadStatus;
+        double actualProgressByTime;
+        logger.info("Total estimated hours           = {}", totalWorkingTimeEstimated);
+        logger.info("Total hours spent               = {}", totalWorkingTimeSpent);
+        logger.info("Total hours spent per task done = {}", totalWorkingTimeSpentPerTaskDone);
+        actualProgressByTime = (double) Math.round((float) (100 * totalWorkingTimeSpent) / totalWorkingTimeEstimated) / 100;
+        logger.info("Hours remaining                 = {}", totalWorkingTimeEstimated - totalWorkingTimeSpent);
+        totalWorkingTimeToDo = (totalWorkingTimeEstimated - totalWorkingTimeSpent);
+        totalWorkloadStatus = (totalWorkingTimeEstimated < workingHours * 0.9) ? 1 :
+                              (totalWorkingTimeEstimated > workingHours * 1.1) ? -1 : 0;
+        String cmt = (totalWorkloadStatus == -1) ? " more than" : (totalWorkloadStatus == 1) ? " less than" : "";
+        logger.info("Total workload is{} expected", cmt);
+        if (totalWorkloadStatus == -1) {
+            logger.info("Should be {} hours less", totalWorkingTimeEstimated - workingHours);
+        }
+        WorkloadResponseDTO response = new WorkloadResponseDTO(
+                totalWorkingTimeEstimated, totalWorkingTimeToDo, totalWorkingTimeSpent, totalWorkingTimeSpentPerTaskDone,
+                totalWorkloadStatus, actualProgressByTime, getCurTimestamp()
+        );
+        return response;
 
-            Iterator<SubTaskEntity> iterator = subTaskEntities.iterator();
+    }
+
+    @Override
+    public BaseResultDTO optimizedTaskAssignmentForUser(String userName, Timestamp ts) {
+        int month = DataUtils.getMonthFromTimestamp(ts);
+        logger.info("MONTH: {}",months[month]);
+        SingleResultDTO<Object> result = new SingleResultDTO<>();
+        try {
+            UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
+            List<TimeSheetEntity> taskEntities = timesheetRepository.getTimeSheetEntitiesByMonth(month);//subtask
+            List<TimesheetDTO> taskDTOs = taskEntities.stream()
+                    .map(taskEntity -> modelMapper.map(taskEntity, TimesheetDTO.class))
+                    .collect(Collectors.toList());
+            Iterator<TimeSheetEntity> iterator = taskEntities.iterator();
             while (iterator.hasNext()) {
-                SubTaskEntity subTask = iterator.next();
-                if (subTask.getHoursSpent() == 0) {
-                    subTask.setAssignedUser(null);
-                    subTaskRepository.save(subTask);
+                TimeSheetEntity task = iterator.next();
+                if (timesheetRepository.getSumOfHoursSpentByTimeSheetId(task.getTimesheetId()) == 0 &&
+                    user.getRoles().contains(task.getTimesheetRole()) &&  task.getStatus() == 0
+                ) {
+                    if(task.getOldAssignedUser() == null) task.setOldAssignedUser(task.getAssignedUser());
+                    task.setAssignedUser(null);
+                    timesheetRepository.save(task);
                 } else {
                     iterator.remove();
-                    subTaskCount--;
                 }
             }
-
+            int taskCount = taskEntities.size();
+            logger.info("timesheet SIZE {}", taskEntities.size());
             //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-            int[] bestAssignment = assignSubTasks(subTaskCount, users, subTaskEntities, 200, 200, ts);
-            result.setSuccess(bestAssignment);
+            TaskAssignedListDTO rep = assignTasksForSingleUser(taskCount, user, taskEntities, ts, taskDTOs);
+            result.setSuccess(rep);
         }catch (Exception e){
             result.setFail("error while assigning tasks");
             logger.info(e.getMessage());
@@ -370,141 +334,31 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
     }
 
     @Override
-    public BaseResultDTO transferSubTasksOfUser(Long id, String name, Timestamp ts) {
-        SingleResultDTO result = new SingleResultDTO<>();
+    public BaseResultDTO optimizedTaskAssignmentByMonth(Long id, Timestamp ts) {
+        int month = DataUtils.getMonthFromTimestamp(ts);
+        logger.info("MONTH: {}.",months[month]);
+        SingleResultDTO<Object> result = new SingleResultDTO<>();
         try {
-            UsersEntity userToRemove = usersRepository.findUsersEntityByUserName(name);
             List<UsersEntity> users = usersRepository.findUsersInTeamByProjectId(id);
-            users.remove(userToRemove);
-            int subTaskCount = Math.toIntExact(subTaskRepository.getSubTaskCountByProjectIdAndUserId(id, userToRemove.getUserId()));
-            List<SubTaskEntity> subTaskEntities = subTaskRepository.getSubTaskByProjectIdAndUserId(id, userToRemove.getUserId());//subtask
-
-            //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-            int[] bestAssignment = assignSubTasks(subTaskCount, users, subTaskEntities, 200, 200, ts);
-            result.setSuccess(bestAssignment);
-        }catch (Exception e){
-            result.setFail("error while assigning tasks");
-            logger.info(e.getMessage());
-        }
-        return result;
-    }
-
-    private int[] assignSubTasks(int subTaskCount, List<UsersEntity> users, List<SubTaskEntity> subTaskEntities,
-                                 int numGen, int populationSize, Timestamp ts){
-        int[] bestAssignment;
-        int[] currentWorkloads = new int[users.size()];
-        int[] subTaskIdList = new int[subTaskCount];
-        int[] subTaskEstimatedHour = new int[subTaskCount];
-        int[] taskLevel = new int[subTaskCount];
-        int[] userLevel = new int[users.size()];
-        for(int i = 0;i<subTaskCount;i++){
-            subTaskIdList[i] = Math.toIntExact(subTaskEntities.get(i).getId());
-            subTaskEstimatedHour[i] = subTaskEntities.get(i).getEstimatedHours().intValue();
-            taskLevel[i] = Math.toIntExact(subTaskEntities.get(i).getTimeSheetEntity().getLevelId());
-//            logger.info("subTaskIdList " + subTaskIdList[i] + " subTaskEstimatedHour " + subTaskEstimatedHour[i]);
-        }
-
-        for(int i = 0;i<users.size();i++){
-            userLevel[i] = Math.toIntExact(users.get(i).getLevelId());
-            SingleResultDTO currentUserWorkload = (SingleResultDTO) monthlyWorkloadTrackingByUser(users.get(i).getUserName(), ts);
-            WorkloadResponseDTO response = (WorkloadResponseDTO) currentUserWorkload.getData();
-            currentWorkloads[i] += response.getTotalWorkingTimeToDo();
-        }
-
-        for(int i = 0;i<users.size();i++){
-            logger.info(users.get(i).getUserName() + " workload " + currentWorkloads[i]);
-        }
-
-        //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-        bestAssignment = geneticAlgorithm(subTaskCount, users.size(), numGen, populationSize, currentWorkloads, subTaskEstimatedHour, taskLevel, userLevel);
-
-        System.out.println("Best assignment:");
-        reportSubTasks(bestAssignment, users, subTaskIdList, subTaskEstimatedHour);
-
-        return bestAssignment;
-    }
-
-    private void reportSubTasks(int[] bestAssignment, List<UsersEntity> users, int[] subTaskIdList, int[] subTaskEstimatedHour){
-        int[] tasksPerMem = new int[users.size()];//tasks per member
-        int[] totalWorkloadOfMem = new int[users.size()];//total workload
-        for (int i = 0; i < bestAssignment.length; i++) {
-            System.out.printf("Task %d - %d hours assigned to %s\n", subTaskIdList[i], subTaskEstimatedHour[i], users.get(bestAssignment[i]).getUserName());
-
-            tasksPerMem[bestAssignment[i]]++;
-            totalWorkloadOfMem[bestAssignment[i]]+=subTaskEstimatedHour[i];
-
-            subTaskServices.assignSubTaskToUser(users.get(bestAssignment[i]).getUserName(), (long) subTaskIdList[i]);
-        }
-        String rep = "\n";
-        for(int i = 0; i < users.size(); i++){
-            rep += "Mem " + i + " " + tasksPerMem[i] + " " + totalWorkloadOfMem[i]+"\n";
-        }
-        logger.info(rep);
-    }
-
-    @Override
-    public BaseResultDTO optimizedTaskAssignmentByProjectId(Long id, Timestamp ts) {
-        SingleResultDTO result = new SingleResultDTO<>();
-        try {
-            ProjectEntity project = projectRepository.getProjectEntityByProjectId(id);
-            List<UsersEntity> users = usersRepository.findUsersInTeamByProjectId(id);
-            int taskCount = Math.toIntExact(timesheetRepository.getTotalTaskCountByProjectId(id));
-            List<TimeSheetEntity> taskEntities = timesheetRepository.findTimeSheetEntitiesByProjectId(id);//subtask
+            List<TimeSheetEntity> taskEntities = timesheetRepository.getTimeSheetEntitiesByMonth(month);//subtask
 
             Iterator<TimeSheetEntity> iterator = taskEntities.iterator();
             while (iterator.hasNext()) {
                 TimeSheetEntity task = iterator.next();
-                if (timesheetRepository.getSumOfHoursSpentByTimeSheetId(task.getTimesheetId()) == 0) {
-                    task.setUsersEntity(null);
+                if (timesheetRepository.getSumOfHoursSpentByTimeSheetId(task.getTimesheetId()) == 0 && task.getStatus() == 0)
+                {
+                    task.setAssignedUser(null);
                     timesheetRepository.save(task);
-                } else {
+                } else
+                {
                     iterator.remove();
-                    taskCount--;
                 }
             }
-
+            int taskCount = taskEntities.size();
+            logger.info("timesheet SIZE {}.", taskEntities.size());
             //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-            int[] bestAssignment = assignTasks(taskCount, users, taskEntities, 200, 200, ts);
+            TaskAssignedToTeamDTO bestAssignment = assignTasks(taskCount, users, taskEntities, ts);
             result.setSuccess(bestAssignment);
-        }catch (Exception e){
-            result.setFail("error while assigning tasks");
-            logger.info(e.getMessage());
-        }
-        return result;
-    }
-
-    @Override
-    public BaseResultDTO optimizedTaskAssignmentByProjectIdWeekly(Long id, Timestamp ts) {
-        SingleResultDTO result = new SingleResultDTO<>();
-        Timestamp mon = DataUtils.getDayOfWeek(ts, DayOfWeek.MONDAY);
-        Timestamp sat = DataUtils.getDayOfWeek(ts, DayOfWeek.SATURDAY);
-        try {
-
-            ProjectEntity project = projectRepository.getProjectEntityByProjectId(id);
-            List<UsersEntity> users = usersRepository.findUsersInTeamByProjectId(id);
-            int taskCount = Math.toIntExact(timesheetRepository.getTotalTaskCountByProjectId(id));
-            List<TimeSheetEntity> taskEntities = timesheetRepository.findTimeSheetEntitiesByProjectId(id);//subtask
-            if(!taskEntities.isEmpty()){
-                Iterator<TimeSheetEntity> iterator = taskEntities.iterator();
-                while (iterator.hasNext()) {
-                    TimeSheetEntity task = iterator.next();
-                    if (timesheetRepository.getSumOfHoursSpentByTimeSheetId(task.getTimesheetId()) == 0
-                            && (task.getStartDateExpected().after(mon) && task.getFinishDateExpected().before(sat))
-                    ) {
-                        task.setUsersEntity(null);
-                        timesheetRepository.save(task);
-                    } else {
-                        iterator.remove();
-                        taskCount--;
-                    }
-                }
-                //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-                int[] bestAssignment = assignTasks(taskCount, users, taskEntities, 200, 200, ts);
-                result.setSuccess(bestAssignment);
-            }else {
-                logger.info("empty");
-                result.setFail("empty list");
-            }
         }catch (Exception e){
             result.setFail("error while assigning tasks");
             logger.info(e.getMessage());
@@ -514,16 +368,22 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
 
     @Override
     public BaseResultDTO transferTasksOfUser(Long id, String name, Timestamp ts) {
-        SingleResultDTO result = new SingleResultDTO<>();
+        SingleResultDTO<Object> result = new SingleResultDTO<>();
         try {
             UsersEntity userToRemove = usersRepository.findUsersEntityByUserName(name);
             List<UsersEntity> users = usersRepository.findUsersInTeamByProjectId(id);
             users.remove(userToRemove);
-            int taskCount = Math.toIntExact(timesheetRepository.getTaskCountByProjectIdAndUserId(id, userToRemove.getUserId()));
-            List<TimeSheetEntity> taskEntities = timesheetRepository.getTaskByProjectIdAndUserId(id, userToRemove.getUserId());//task
-
+            SingleResultDTO response = (SingleResultDTO) confirmUserTaskForMonth(name, ts, 0, 1);
+            List<TimeSheetEntity> taskEntities = (List<TimeSheetEntity>) response.getData();
+            int taskCount = taskEntities.size();
+            for(TimeSheetEntity timeSheetEntity : taskEntities) {
+                logger.info("{} {}", timeSheetEntity.getTimesheetId(), timeSheetEntity.getAssignedUser().getUserName());
+                timeSheetEntity.setOldAssignedUser(userToRemove);
+                timesheetRepository.save(timeSheetEntity);
+                logger.info("task entity updated");
+            }
             //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-            int[] bestAssignment = assignTasks(taskCount, users, taskEntities, 200, 200, ts);
+            TaskAssignedToTeamDTO bestAssignment = assignTasks(taskCount, users, taskEntities, ts);
             result.setSuccess(bestAssignment);
         }catch (Exception e){
             result.setFail("error while assigning tasks");
@@ -532,69 +392,245 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
         return result;
     }
 
-    private int[] assignTasks(int taskCount, List<UsersEntity> users, List<TimeSheetEntity> taskEntities,
-                                 int numGen, int populationSize, Timestamp ts){
-        int[] bestAssignment;
-        int[] currentWorkloads = new int[users.size()];
-        int[] taskIdList = new int[taskCount];
-        int[] taskEstimatedHour = new int[taskCount];
-        int[] taskLevel = new int[taskCount];
-        int[] userLevel = new int[users.size()];
+    @Override
+    public BaseResultDTO confirmUserTaskForMonth(String userName, Timestamp ts, int status, int curStatus) {
+        SingleResultDTO result = new SingleResultDTO<>();
+        int month = DataUtils.getMonthFromTimestamp(ts);
+        if(!(status >= 0 && status <=2) || !(curStatus >= 0 && curStatus <=2) ){
+            result.setFail("status is not correct");
+        }else {
+            try {
+                UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
+                List<TimeSheetEntity> taskEntities = timesheetRepository.getAssignedTaskByMonthAndStatusAndUserId(month, curStatus, user.getUserId());//subtask
+                logger.info("{} tasks not confirmed", taskEntities.size());
+                for(TimeSheetEntity task : taskEntities){
+                    task.setStatus(status);
+                    logger.info("Task {} confirmed", task.getTimesheetId());
+                    timesheetRepository.save(task);
+                }
+                result.setSuccess(taskEntities);
+            }catch (Exception e){
+                logger.info(e.getMessage());
+                result.setFail(e.getMessage());
+            }
+        }
+        return result;
+    }
+
+    private TaskAssignedListDTO assignTasksForSingleUser(int taskCount, UsersEntity user, List<TimeSheetEntity> taskEntities, Timestamp ts, List<TimesheetDTO> taskDTOs){
+        int month = DataUtils.getMonthFromTimestamp(ts);
+        int[] bestAssignment, taskRole = new int[taskCount], taskIdList = new int[taskCount],
+                taskEstimatedHour = new int[taskCount], taskLevel = new int[taskCount];
+        double[] taskRisk = new double[taskCount];
+        List<RoleEntity> roleList;
+        int currentWorkloads, userLevel;
+        RiskFromUserEntity risk = user.getRiskFromUser();
+        double riskMultiplier = risk.getMultiplier();
+
+        for(int i = 0;i<taskCount;i++){
+            Long a = taskEntities.get(i).getTimesheetRisk().get(0).getId();
+            Long id = taskEntities.get(i).getTimesheetId();
+            taskIdList[i] = Math.toIntExact(id);
+            taskEstimatedHour[i] = timesheetRepository.getSumOfEstimatedHoursByTimeSheetId(id);
+            LevelsEntity levelOfTask = levelsRepository.findLevelsEntityByLevelId(taskEntities.get(i).getLevelId());
+            taskLevel[i] = Math.toIntExact(levelOfTask.getLevelValue());
+            taskRole[i] = Math.toIntExact(taskEntities.get(i).getTimesheetRole().getRoleId());
+            taskRisk[i] = riskRepository.getRiskMultiplierTotalByTimesheetId(taskEntities.get(i).getTimesheetId());
+        }
+
+        SingleResultDTO currentUserWorkload = (SingleResultDTO) monthlyWorkloadTrackingByUser(user.getUserName(), DataUtils.getMonthFromTimestamp(ts));
+        WorkloadResponseDTO response = (WorkloadResponseDTO) currentUserWorkload.getData();
+        currentWorkloads = Math.toIntExact(response.getTotalWorkingTimeRemains());
+
+        LevelsEntity levelOfUser = levelsRepository.findLevelsEntityByLevelId(user.getLevelId());
+        userLevel = Math.toIntExact(levelOfUser.getLevelValue());
+
+        roleList = user.getRoles();
+        logger.info("single user {} workload {}", user.getUserName(), currentWorkloads);
+
+        //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
+        bestAssignment = geneticAlgorithmSingleUser(taskCount, 1000, 1000, currentWorkloads, taskEstimatedHour,
+                taskLevel, userLevel, taskRisk, riskMultiplier);
+        logger.info("Best assignment:");
+        logger.info("task id list " + Arrays.toString(taskIdList));
+        return reportTasksForSingleUser(bestAssignment, user, taskIdList, taskEstimatedHour, taskDTOs);
+    }
+
+    private TaskAssignedToTeamDTO assignTasks(int taskCount, List<UsersEntity> users, List<TimeSheetEntity> taskEntities, Timestamp ts){
+//        int month = DataUtils.getMonthFromTimestamp(ts);
+        int[] bestAssignment, currentWorkloads = new int[users.size()], taskRole = new int[taskCount],
+                taskIdList = new int[taskCount], taskEstimatedHour = new int[taskCount],
+                taskLevel = new int[taskCount], userLevel = new int[users.size()];
+        List<RoleEntity> roleList;
+        int[][] userRoles = new int[users.size()][(int) roleRepository.count()];
+        double[] riskFromUsers = new double[users.size()];
+        double[] taskRisk = new double[taskCount];
         for(int i = 0;i<taskCount;i++){
             Long id = taskEntities.get(i).getTimesheetId();
             taskIdList[i] = Math.toIntExact(id);
             taskEstimatedHour[i] = timesheetRepository.getSumOfEstimatedHoursByTimeSheetId(id);
-            taskLevel[i] = Math.toIntExact(taskEntities.get(i).getLevelId());
-//            logger.info("taskIdList " + taskIdList[i] + " taskEstimatedHour " + taskEstimatedHour[i]);
+            LevelsEntity levelOfTask = levelsRepository.findLevelsEntityByLevelId(taskEntities.get(i).getLevelId());
+            taskLevel[i] = Math.toIntExact(levelOfTask.getLevelValue());
+            taskRole[i] = Math.toIntExact(taskEntities.get(i).getTimesheetRole().getRoleId());
+            taskRisk[i] = riskRepository.getRiskMultiplierTotalByTimesheetId(taskEntities.get(i).getTimesheetId());
         }
 
         for(int i = 0;i<users.size();i++){
-            SingleResultDTO currentUserWorkload = (SingleResultDTO) monthlyWorkloadTrackingByUser(users.get(i).getUserName(), ts);
+            SingleResultDTO currentUserWorkload = (SingleResultDTO) monthlyWorkloadTrackingByUser(users.get(i).getUserName(), DataUtils.getMonthFromTimestamp(ts));
             WorkloadResponseDTO response = (WorkloadResponseDTO) currentUserWorkload.getData();
-            currentWorkloads[i] += response.getTotalWorkingTimeToDo();
+            currentWorkloads[i] += response.getTotalWorkingTimeRemains();
+            riskFromUsers[i] = users.get(i).getRiskFromUser().getMultiplier();
         }
         for(int i = 0;i<users.size();i++){
-            userLevel[i] = Math.toIntExact(users.get(i).getLevelId());
+            LevelsEntity levelOfUser = levelsRepository.findLevelsEntityByLevelId(users.get(i).getLevelId());
+            userLevel[i] = Math.toIntExact(levelOfUser.getLevelValue());
+            roleList = users.get(i).getRoles();
+            for(int k = 0;k < roleList.size();k++){
+                userRoles[i][k] = Math.toIntExact(roleList.get(k).getRoleId());
+            }
             logger.info(users.get(i).getUserName() + " workload " + currentWorkloads[i]);
             System.out.println(users.get(i).getUserName());
         }
 
         //result bestAssignment[i]: task i is assigned to member with idx num bestAssignment[i]
-        bestAssignment = geneticAlgorithm(taskCount, users.size(), numGen, populationSize, currentWorkloads, taskEstimatedHour, taskLevel, userLevel);
+        bestAssignment = geneticAlgorithmForTeam(taskCount, users.size(), 1000, 10000, currentWorkloads, taskEstimatedHour,
+                taskLevel, userLevel, taskRole, userRoles, taskRisk, riskFromUsers);
 
         System.out.println("Best assignment:");
-        reportTasks(bestAssignment, users, taskIdList, taskEstimatedHour);
 
-        return bestAssignment;
+        return reportTasks(bestAssignment, users, taskIdList, taskEstimatedHour);
     }
-
-    private void reportTasks(int[] bestAssignment, List<UsersEntity> users, int[] subTaskIdList, int[] subTaskEstimatedHour){
+//TODO đang làm p này
+    private TaskAssignedToTeamDTO reportTasks(int[] bestAssignment, List<UsersEntity> users, int[] subTaskIdList, int[] subTaskEstimatedHour){
+        List<UsersDTO> userDTOs = users.stream()
+                .map(user -> modelMapper.map(user, UsersDTO.class))
+                .collect(Collectors.toList());
+        List<TaskAssignedToTeamListDTO> taskAssignedToTeamListDTOS = new ArrayList<>();
         int[] tasksPerMem = new int[users.size()];//tasks per member
         int[] totalWorkloadOfMem = new int[users.size()];//total workload
+        String res = "";
         for (int i = 0; i < bestAssignment.length; i++) {
-            System.out.printf("Task %d - %d hours assigned to %s\n", subTaskIdList[i], subTaskEstimatedHour[i], users.get(bestAssignment[i]).getUserName());
+            String tmp = "";
+            int status = -1;
+            TimeSheetEntity currentTask = timesheetRepository.getTimeSheetEntityByTimesheetId((long) subTaskIdList[i]);
+            double risk = riskOfSingleTask(1,  riskRepository.getRiskMultiplierTotalByTimesheetId((long) subTaskIdList[i]));
+            if(bestAssignment[i] == users.size()){
+
+                tmp = "Task " + subTaskIdList[i] + " - " + subTaskEstimatedHour[i] + " hours not assigned";
+                res += tmp;
+                logger.info(tmp);
+                status = 2;
+
+                int workload = timesheetRepository.getSumOfEstimatedHoursByTimeSheetId(currentTask.getTimesheetId());
+                TimesheetDTO timesheetDTO = modelMapper.map(timesheetRepository.getTimeSheetEntityByTimesheetId((long) subTaskIdList[i]), TimesheetDTO.class);
+                TaskAssignedToTeamListDTO tasks = new TaskAssignedToTeamListDTO(null, risk, tmp, status, workload, timesheetDTO);
+                taskAssignedToTeamListDTOS.add(tasks);
+                continue;
+            }
+            UsersEntity currentAssignedUser = users.get(bestAssignment[i]);
+            tmp = "Task " + subTaskIdList[i] + " - " + subTaskEstimatedHour[i] + " hours assigned to " + users.get(bestAssignment[i]).getUserName();
+            res += tmp;
+            logger.info(tmp);
+            status = 1;
 
             tasksPerMem[bestAssignment[i]]++;
             totalWorkloadOfMem[bestAssignment[i]]+=subTaskEstimatedHour[i];
+            assignTaskToUser(currentAssignedUser.getUserName(), (long) subTaskIdList[i]);
+//            int levelValue = Math.toIntExact(levelsRepository.findLevelsEntityByLevelId(currentTask.getLevelId()).getLevelValue());
+//            int userLevelValue = Math.toIntExact(levelsRepository.findLevelsEntityByLevelId(currentAssignedUser.getLevelId()).getLevelValue());
 
-            assignTaskToUser(users.get(bestAssignment[i]).getUserName(), (long) subTaskIdList[i]);
+            UsersDTO currentAssignedUserDTO = modelMapper.map(users.get(bestAssignment[i]), UsersDTO.class);
+//            double risk = riskOfSingleTask(1,  riskRepository.getRiskMultiplierTotalByTimesheetId((long) subTaskIdList[i]));
+            int workload = timesheetRepository.getSumOfEstimatedHoursByTimeSheetId(currentTask.getTimesheetId());
+            TimesheetDTO timesheetDTO = modelMapper.map(timesheetRepository.getTimeSheetEntityByTimesheetId((long) subTaskIdList[i]), TimesheetDTO.class);
+            TaskAssignedToTeamListDTO tasks = new TaskAssignedToTeamListDTO(currentAssignedUserDTO, risk, tmp, status, workload, timesheetDTO);
+            taskAssignedToTeamListDTOS.add(tasks);
         }
         String rep = "\n";
         for(int i = 0; i < users.size(); i++){
-            rep += "Mem " + i + " " + tasksPerMem[i] + " " + totalWorkloadOfMem[i]+"\n";
+            rep += "User " + users.get(i).getUserName() + " " + tasksPerMem[i] + " " + totalWorkloadOfMem[i]+"\n";
         }
         logger.info(rep);
+        TaskAssignedToTeamDTO result = new TaskAssignedToTeamDTO( userDTOs, taskAssignedToTeamListDTOS);
+        return result;
+    }
+
+    private TaskAssignedListDTO reportTasksForSingleUser(int[] bestAssignment, UsersEntity user, int[] subTaskIdList, int[] subTaskEstimatedHour, List<TimesheetDTO> taskDTOs){
+        int tasksPerMem = 0; //tasks per member
+        int totalWorkloadOfMem = 0; //total workload
+        List<TaskAssignedDTO> taskAssignedDTOS = new ArrayList<>();
+        List<Integer> assignedTaskId = new ArrayList<>();
+        TaskAssignedDTO taskAssignedDTO;
+        String res = "";
+//        int userLevelValue = Math.toIntExact(levelsRepository.findLevelsEntityByLevelId(user.getLevelId()).getLevelValue());
+        for (int i = 0; i < taskDTOs.size(); i++){
+            TimesheetDTO timesheetDTO = taskDTOs.get(i);
+            int status = 0,workload = timesheetRepository.getSumOfEstimatedHoursByTimeSheetId(timesheetDTO.getTimesheetId());
+//            int levelValue = Math.toIntExact(levelsRepository.findLevelsEntityByLevelId(timesheetDTO.getLevelId()).getLevelValue());
+            double risk = riskOfSingleTask(1,  riskRepository.getRiskMultiplierTotalByTimesheetId(timesheetDTO.getTimesheetId()));
+            String description = "Task does not fit user's roles/ Task assigned to other user";
+            for(int k = 0; k < subTaskIdList.length; k++){
+                if(taskDTOs.get(i).getTimesheetId() == subTaskIdList[k]){
+                    //in available tasks for user
+                    if(bestAssignment[k] == 1){
+                        assignedTaskId.add(subTaskIdList[k]);
+                        String tmp = "Task " + subTaskIdList[k] + " - " + subTaskEstimatedHour[k] + " hours assigned to " + user.getUserName() ;
+                        res += tmp + "\n";
+                        logger.info(tmp);
+                        tasksPerMem++;
+                        totalWorkloadOfMem+=subTaskEstimatedHour[k];
+                        assignTaskToUser(user.getUserName(), (long) subTaskIdList[k]);
+                        taskDTOs.get(i).setAssignedUser(user);
+                        description = "Task is assigned to user";
+                        status = 1;
+                        //assigned
+                    }
+                    else {
+                        String tmp = "Task " + subTaskIdList[k] + " - " + subTaskEstimatedHour[k] + " hours not assigned";
+                        res += tmp + "\n";logger.info(tmp);
+                        description = "Task is not assigned to user";
+                        status = 2;
+                        //not assigned
+                    }
+                    break;
+                }
+
+            }
+            taskAssignedDTO = new TaskAssignedDTO(risk, description, status, workload, taskDTOs.get(i));
+            taskAssignedDTOS.add(taskAssignedDTO);
+        }
+//        for (int i = 0; i < bestAssignment.length; i++) {
+//
+//            if(bestAssignment[i] == 1){
+//                String tmp = "Task " + subTaskIdList[i] + " - " + subTaskEstimatedHour[i] + " hours assigned to " + user.getUserName() ;
+//                res += tmp + "\n";
+//                logger.info(tmp);
+//                tasksPerMem++;
+//                totalWorkloadOfMem+=subTaskEstimatedHour[i];
+//
+//                assignTaskToUser(user.getUserName(), (long) subTaskIdList[i]);
+//            }
+//            else {
+//                String tmp = "Task " + subTaskIdList[i] + " - " + subTaskEstimatedHour[i] + " hours not assigned";
+//                res += tmp + "\n";logger.info(tmp);
+//            }
+//        }
+        TaskAssignedListDTO result = new TaskAssignedListDTO(modelMapper.map(user, UsersDTO.class), assignedTaskId, taskAssignedDTOS);
+        double workloadPercent =  (double) Math.round((float) (100 * totalWorkloadOfMem) / 160) /100;
+        String rep = "Mem " + " " + tasksPerMem + " " + workloadPercent;
+        logger.info(rep);
+        return result;
     }
 
     @Override
     public BaseResultDTO assignTaskToUser(String userName, Long timeSheetId) {
-        SingleResultDTO result = new SingleResultDTO();
+        SingleResultDTO<Object> result = new SingleResultDTO<>();
         try{
             UsersEntity user = usersRepository.findUsersEntityByUserName(userName);
             TimeSheetEntity task;
             if(timesheetRepository.findById(timeSheetId).isPresent()){
                 task = timesheetRepository.findById(timeSheetId).get();
-                task.setUsersEntity(user);
+                task.setAssignedUser(user);
                 task.setLastUpdate(getCurTimestamp());
                 timesheetRepository.save(task);
                 result.setSuccess(task);

@@ -20,13 +20,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class JwtLoginRegisterProcessingFilter extends AbstractAuthenticationProcessingFilter {
-    private JwtAuthenticationLoginRegisterSuccessHandler successHandler;
+    private final JwtAuthenticationLoginRegisterSuccessHandler successHandler;
 
-    private JwtAuthenticationLoginRegisterFailureHandler failureHandler;
+    private final JwtAuthenticationLoginRegisterFailureHandler failureHandler;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     public JwtLoginRegisterProcessingFilter(RequestMatcher matcher,
                                             JwtAuthenticationLoginRegisterSuccessHandler successHandler,

@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 public class JwtAuthenticationLogin extends AbstractAuthenticationToken {
-    private JwtUserDetails jwtUserDetails;
-    private String password;
+    private final JwtUserDetails jwtUserDetails;
+    private final String password;
 
     public JwtAuthenticationLogin(UserDetailsService userDetailsService, String username, String password) {
         super(null);

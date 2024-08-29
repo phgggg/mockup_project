@@ -29,7 +29,7 @@ public class OpenFileController extends BaseRest {
     @GetMapping("/Upload")
     public String test(){
         logger.info("chay bt");
-        List<Field> allFields = Arrays.asList(ProjectStatusDTO.class.getDeclaredFields());
+        Field[] allFields = ProjectStatusDTO.class.getDeclaredFields();
         for(Field f : allFields){
             logger.info("a\t"+f.getName());
         }

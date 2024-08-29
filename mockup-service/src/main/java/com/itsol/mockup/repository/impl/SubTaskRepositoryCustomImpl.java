@@ -21,10 +21,9 @@ public class SubTaskRepositoryCustomImpl extends BaseRepo implements SubTaskRepo
         session.beginTransaction();
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS));
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK));
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK);
+            SQLQuery query = session.createSQLQuery(sb);
 
             if (!DataUtils.isNullOrEmpty(String.valueOf(mon))) {
                 query.setParameter("mon",
@@ -60,11 +59,10 @@ public class SubTaskRepositoryCustomImpl extends BaseRepo implements SubTaskRepo
         session.beginTransaction();
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS));
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK));
-            sb.append("AND st.status = 'done'");
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_CONDITION_STATUS);
+            SQLQuery query = session.createSQLQuery(sb);
 
             if (!DataUtils.isNullOrEmpty(String.valueOf(mon))) {
                 query.setParameter("mon",
@@ -100,10 +98,9 @@ public class SubTaskRepositoryCustomImpl extends BaseRepo implements SubTaskRepo
         session.beginTransaction();
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_HOURS_SPENT));
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK));
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_HOURS_SPENT) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK);
+            SQLQuery query = session.createSQLQuery(sb);
 
             if (!DataUtils.isNullOrEmpty(String.valueOf(mon))) {
                 query.setParameter("mon",
@@ -139,10 +136,9 @@ public class SubTaskRepositoryCustomImpl extends BaseRepo implements SubTaskRepo
         session.beginTransaction();
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS));
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK_MONTH));
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK_MONTH);
+            SQLQuery query = session.createSQLQuery(sb);
 
             if (!DataUtils.isNullOrEmpty(String.valueOf(month))) {
                 query.setParameter("month",
@@ -178,11 +174,10 @@ public class SubTaskRepositoryCustomImpl extends BaseRepo implements SubTaskRepo
         session.beginTransaction();
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS));
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK_MONTH));
-            sb.append("AND st.status = 'done'");
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_ESTIMATED_HOURS) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK_MONTH) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_CONDITION_STATUS);
+            SQLQuery query = session.createSQLQuery(sb);
 
             if (!DataUtils.isNullOrEmpty(String.valueOf(month))) {
                 query.setParameter("month",
@@ -218,10 +213,10 @@ public class SubTaskRepositoryCustomImpl extends BaseRepo implements SubTaskRepo
         session.beginTransaction();
 
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_HOURS_SPENT));
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK_MONTH));
-            SQLQuery query = session.createSQLQuery(sb.toString());
+            String sb = SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_SELECT_HOURS_SPENT) +
+                    SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_SUBTASK, SQLBuilder.SQL_FILE_FROM_SUBTASK_MONTH);
+//            sb.append(" and actual_finish_date is not null");
+            SQLQuery query = session.createSQLQuery(sb);
 
             if (!DataUtils.isNullOrEmpty(String.valueOf(month))) {
                 query.setParameter("month",

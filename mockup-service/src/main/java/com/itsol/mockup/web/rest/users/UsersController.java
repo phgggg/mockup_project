@@ -2,7 +2,6 @@ package com.itsol.mockup.web.rest.users;
 
 import com.itsol.mockup.entity.TimeSheetEntity;
 import com.itsol.mockup.services.UsersService;
-import com.itsol.mockup.utils.ExcelUtil;
 import com.itsol.mockup.web.dto.request.IdRequestDTO;
 import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.text.ParseException;
 
 
@@ -100,7 +98,7 @@ public class UsersController extends BaseRest {
     public ResponseEntity<BaseResultDTO> addTaskToUser(@RequestBody AddTaskDTO addTaskDTO,
                                                        @RequestHeader HttpHeaders header) throws ParseException {
 //        BaseResultDTO baseResultDTO = usersService.addTaskToUser(userName, timesheetDTO, projectId, retrieveToken(header));
-        TimeSheetEntity taskToAdd = convertToEntity(addTaskDTO.getTimesheetDTO());
+        TimeSheetEntity taskToAdd = convertToEntity(addTaskDTO.getTimesheetStatusDTO());
         BaseResultDTO baseResultDTO = usersService.addTaskToUser(addTaskDTO.getUserName(), taskToAdd, addTaskDTO.getProjectId(), retrieveToken(header));
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
@@ -108,7 +106,7 @@ public class UsersController extends BaseRest {
     @PutMapping(value = "/updateTask")
     public  ResponseEntity<BaseResultDTO> updateUserTask(@RequestBody AddTaskDTO updateTask,
                                                          @RequestHeader HttpHeaders header) throws ParseException {
-        TimeSheetEntity taskToUpdate = convertToEntity(updateTask.getTimesheetDTO());
+        TimeSheetEntity taskToUpdate = convertToEntity(updateTask.getTimesheetStatusDTO());
         BaseResultDTO baseResultDTO = usersService.updateUserTask(updateTask.getUserName(), taskToUpdate, updateTask.getProjectId(), retrieveToken(header));
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }

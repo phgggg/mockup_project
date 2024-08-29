@@ -11,19 +11,20 @@ import com.itsol.mockup.web.dto.project.ProjectStatusDTO;
 import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.response.SingleResultDTO;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetStatusDTO;
+import com.itsol.mockup.web.dto.timesheet.WorkloadResponseDTO;
+import com.itsol.mockup.web.dto.users.UsersDTO2;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.itsol.mockup.utils.Constants.months;
+import static com.itsol.mockup.utils.Constants.workingHoursPerMonth;
 
 @Service
 public class ProjectServiceImpl extends BaseService implements ProjectService {
@@ -158,6 +159,8 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
     public BaseResultDTO getProjectStatus(Long id, int month, int page, int pageSize) {
         SingleResultDTO result = new SingleResultDTO<>();
         ProjectStatusDTO projectStatusDTO = null;
+        List<UsersDTO2> userListDTO = new ArrayList<>();
+        List<UsersEntity> userList = new ArrayList<>();
         String des = "";
         logger.info("Tiến độ dự án của tháng " + month);
         try{
@@ -182,10 +185,28 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
             long totalDays = DataUtils.dayDiff(deadline, currentPrj.getActualStartDate());
             double progress = (double) ((int) (((double) (totalDays - daysLeft) / totalDays) * 100)) /100;
             double taskDone = 0, taskOnGoing = 0, monthTaskDone = 0, monthTaskOnGoing = 0, monthTaskToDo = 0;
-            List<TimesheetDTO> tasksStatus = new ArrayList<>();
-
+            List<TimesheetStatusDTO> tasksStatus = new ArrayList<>();
+            UsersDTO2 currentUser;
             logger.info("lay ket qua tung task");
             for (TimeSheetEntity timesheetObj : timesheetList) {
+                logger.info("get user");
+                try{
+                    currentUser = modelMapper.map(timesheetObj.getAssignedUser(), UsersDTO2.class);
+                }catch (Exception e){
+                    currentUser = null;
+                    logger.info("Cant get user: "+e.getMessage());
+                }
+                if((!userList.contains(timesheetObj.getAssignedUser())) && currentUser!=null){
+                    userList.add(timesheetObj.getAssignedUser());
+
+                    SingleResultDTO currentUserWorkload = (SingleResultDTO) timesheetService.monthlyWorkloadTrackingByUser(currentUser.getUserName(), month);
+                    WorkloadResponseDTO response = (WorkloadResponseDTO) currentUserWorkload.getData();
+                    int workloadStatus = response.getTotalWorkloadStatus();
+                    double workloadPercent = (double) response.getTotalWorkingTimeRemains() /workingHoursPerMonth;
+                    currentUser.workloadInp(workloadStatus,workloadPercent);
+                    userListDTO.add(currentUser);
+                }
+
                 switch (timesheetObj.getStatus()){
                     case 2:
                         taskDone++;break;
@@ -203,38 +224,47 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
                 if(DataUtils.getMonthFromTimestamp(timesheetObj.getFinishDateExpected()) == month ||
                         DataUtils.getMonthFromTimestamp(timesheetObj.getActualFinishDate()) == month){
 
-                    des += "Task " + timesheetObj.getTask()
-                            + " of user " + timesheetObj.getUsersEntity().getUserName()
-                            + " status: " + timesheetObj.getStatus() + "\n";
+                    try{
+                        des += "Task " + timesheetObj.getTask()
+                                + " of user " + timesheetObj.getAssignedUser().getUserName()
+                                + " status: " + timesheetObj.getStatus() + "\n";
+                    }catch (Exception e) {
+                        des += "Task " + timesheetObj.getTask()
+                                + " status: " + timesheetObj.getStatus() + "\n";
+                    }
                     String comment = TaskComment(timesheetObj);
                     String[] splitComment = splitInfo(comment.replace(", Task is ",""));
-                    TimesheetDTO timesheetDTO = modelMapper.map(timesheetObj, TimesheetDTO.class);
-                    timesheetDTO.setTaskComment(splitComment);
-                    timesheetDTO.setAssignedUser(timesheetObj.getUsersEntity());
-                    timesheetDTO.setDaysLeft(daysLeftOfTask);
-                    timesheetDTO.setDescription("none");
-                    timesheetDTO.setCreatedBy(null);
-                    timesheetDTO.setProgressByTime(progressOfTaskByTime);
+                    TimesheetStatusDTO timesheetStatusDTO = modelMapper.map(timesheetObj, TimesheetStatusDTO.class);
+                    timesheetStatusDTO.setTaskComment(splitComment);
+                    try{
+                        timesheetStatusDTO.setAssignedUser(timesheetObj.getAssignedUser());
+                    }catch (Exception e){
+                        logger.info("No user available");
+                    }
+                    timesheetStatusDTO.setDaysLeft(daysLeftOfTask);
+                    timesheetStatusDTO.setDescription("none");
+                    timesheetStatusDTO.setCreatedBy(null);
+                    timesheetStatusDTO.setProgressByTime(progressOfTaskByTime);
                     switch (timesheetObj.getStatus()){
                         case 2:
                             monthTaskDone++;
-                            timesheetDTO.setProgressBySubTask(1);
+                            timesheetStatusDTO.setProgressBySubTask(1);
                             break;
                         case 1:
                             monthTaskOnGoing++;
                             try{
-                                timesheetDTO.setProgressBySubTask(subTaskRepository.subTaskDoneCount(timesheetObj.getTimesheetId()));
+                                timesheetStatusDTO.setProgressBySubTask(subTaskRepository.subTaskDoneCount(timesheetObj.getTimesheetId()));
                             }catch (Exception e){
-                                timesheetDTO.setProgressBySubTask(0);
+                                timesheetStatusDTO.setProgressBySubTask(0);
                             }
                             break;
                         default:
                             monthTaskToDo++;
-                            timesheetDTO.setProgressBySubTask(0);
+                            timesheetStatusDTO.setProgressBySubTask(0);
                             break;
                     }
-                    logger.info("task " + timesheetObj.getTimesheetId() + " nay hoan thanh duoc " + timesheetDTO.getProgressBySubTask());
-                    tasksStatus.add(timesheetDTO);
+                    logger.info("task {} nay hoan thanh duoc {}", timesheetObj.getTimesheetId(), timesheetStatusDTO.getProgressBySubTask());
+                    tasksStatus.add(timesheetStatusDTO);
                 }
             }
 
@@ -257,7 +287,7 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
             des += Math.round(monthTaskDone * 100) + "% tasks done\n"
                     + Math.round(monthTaskOnGoing * 100) + "% tasks on going\n"
                     + Math.round(monthTaskToDo * 100) + "% tasks pending\n";
-            List<TimesheetDTO> tasksStatusPage = null;
+            List<TimesheetStatusDTO> tasksStatusPage = null;
             try{
                 tasksStatusPage  = tasksStatus.subList(page*pageSize,(page+1)*pageSize);
             }catch (Exception ee){
@@ -275,7 +305,7 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
                     taskDone,taskOnGoing,taskToDo,
                     monthTaskDone,monthTaskOnGoing,monthTaskToDo,
                     taskDonePercentInMonth, taskOnGoingPercentInMonth, taskToDoPercentInMonth,
-                    tasksStatusPage, des
+                    userListDTO, tasksStatusPage, des
 
             );
             result.setSuccess(projectStatusDTO);
@@ -283,12 +313,14 @@ public class ProjectServiceImpl extends BaseService implements ProjectService {
             Sheet sheet = excelUtil.sheetCreate("project status", projectStatusDTO);
             excelUtil.sheetWriteSingleData(sheet, projectStatusDTO);
             logger.info("create sheet task status");
-            Sheet taskStatusSheet = excelUtil.sheetCreate("taskStatus", new TimesheetDTO());
+            Sheet taskStatusSheet = excelUtil.sheetCreate("taskStatus", new TimesheetStatusDTO());
             logger.info("write into task status");
             excelUtil.sheetWriteListData(taskStatusSheet, tasksStatus);
+            Sheet userListSheet = excelUtil.sheetCreate("userList", new UsersDTO2());
+            logger.info("write into user list");
+            excelUtil.sheetWriteListData(userListSheet, userListDTO);
             logger.info("out");
             excelUtil.out("result");
-
         } catch (Exception e){
             result.setFail("error while getting list of timesheets{}",e.getMessage());
             logger.error(e.getMessage(), e);

@@ -3,7 +3,7 @@ package com.itsol.mockup.web.rest.timesheet;
 import com.itsol.mockup.services.TimesheetService;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.timesheet.SubTaskDTO;
-import com.itsol.mockup.web.dto.timesheet.TimesheetDTO;
+import com.itsol.mockup.web.dto.timesheet.TimesheetStatusDTO;
 import com.itsol.mockup.web.dto.timesheet.WorkLoadRequestDTO;
 import com.itsol.mockup.web.rest.BaseRest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +41,9 @@ public class TimesheetController extends BaseRest {
 
     @CrossOrigin
     @RequestMapping(value = "/timesheet",method = RequestMethod.POST)
-    public ResponseEntity<BaseResultDTO> addTimesheet(@RequestBody TimesheetDTO timesheetDTO,
+    public ResponseEntity<BaseResultDTO> addTimesheet(@RequestBody TimesheetStatusDTO timesheetStatusDTO,
                                                       @RequestHeader HttpHeaders headers){
-        BaseResultDTO result = timesheetService.addTimesheet(timesheetDTO, retrieveToken(headers));
+        BaseResultDTO result = timesheetService.addTimesheet(timesheetStatusDTO, retrieveToken(headers));
         return  new ResponseEntity<>(result,HttpStatus.OK);
     }
 
@@ -58,8 +58,8 @@ public class TimesheetController extends BaseRest {
 
     @CrossOrigin
     @RequestMapping(value = "/timesheet",method = RequestMethod.PUT)
-    public ResponseEntity<BaseResultDTO> updateTimesheet(@RequestBody TimesheetDTO timesheetDTO){
-        BaseResultDTO result = timesheetService.updateTimesheet(timesheetDTO);
+    public ResponseEntity<BaseResultDTO> updateTimesheet(@RequestBody TimesheetStatusDTO timesheetStatusDTO){
+        BaseResultDTO result = timesheetService.updateTimesheet(timesheetStatusDTO);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
@@ -92,55 +92,39 @@ public class TimesheetController extends BaseRest {
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
-    @CrossOrigin
-    @RequestMapping(value = "/timesheet/workload",method = RequestMethod.GET)
-    public ResponseEntity<BaseResultDTO> weeklyWorkloadTrackingByUser(@RequestBody WorkLoadRequestDTO workLoadRequestDTO){
-        String userName = workLoadRequestDTO.getUserName();
-        Timestamp timestamp = workLoadRequestDTO.getTimestamp();
-        BaseResultDTO result = timesheetService.weeklyWorkloadTrackingByUser(userName, timestamp);
-        return new ResponseEntity<>(result,HttpStatus.OK);
-    }
 
     @CrossOrigin
     @RequestMapping(value = "/timesheet/workload/month",method = RequestMethod.GET)
     public ResponseEntity<BaseResultDTO> monthlyWorkloadTrackingByUser(@RequestBody WorkLoadRequestDTO workLoadRequestDTO){
         String userName = workLoadRequestDTO.getUserName();
-        Timestamp timestamp = workLoadRequestDTO.getTimestamp();
-        BaseResultDTO result = timesheetService.monthlyWorkloadTrackingByUser(userName, timestamp);
-        return new ResponseEntity<>(result,HttpStatus.OK);
-    }
-
-    @CrossOrigin
-    @RequestMapping(value = "/timesheet/optimizedSubTaskAssignment",method = RequestMethod.PUT)
-    public ResponseEntity<BaseResultDTO> optimizedSubTaskAssignmentByProjectId(@RequestParam("projectId") Long id,
-                                                                            @RequestParam("timestamp") Timestamp ts){
-        BaseResultDTO result = timesheetService.optimizedSubTaskAssignmentByProjectId(id, ts);
+        int month = workLoadRequestDTO.getMonth();
+        BaseResultDTO result = timesheetService.monthlyWorkloadTrackingByUser(userName, month);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
     @CrossOrigin
     @RequestMapping(value = "/timesheet/optimizedTaskAssignment",method = RequestMethod.PUT)
-    public ResponseEntity<BaseResultDTO> optimizedTaskAssignmentByProjectId(@RequestParam("projectId") Long id,
-                                                                            @RequestParam("timestamp") Timestamp ts){
-        BaseResultDTO result = timesheetService.optimizedTaskAssignmentByProjectId(id, ts);
+    public ResponseEntity<BaseResultDTO> optimizedTaskAssignmentByMonth(@RequestParam("projectId") Long id,
+                                                                        @RequestParam("timestamp") Timestamp ts){
+        BaseResultDTO result = timesheetService.optimizedTaskAssignmentByMonth(id, ts);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/timesheet/optimizedTaskWeekly",method = RequestMethod.PUT)
-    public ResponseEntity<BaseResultDTO> optimizedTaskAssignmentByProjectIdWeekly(@RequestParam("projectId") Long id,
-                                                                            @RequestParam("timestamp") Timestamp ts){
-        BaseResultDTO result = timesheetService.optimizedTaskAssignmentByProjectIdWeekly(id, ts);
+    @RequestMapping(value = "/timesheet/optimizedTaskAssignmentForSingleUser",method = RequestMethod.PUT)
+    public ResponseEntity<BaseResultDTO> optimizedTaskAssignmentForUser(@RequestParam("user") String userName,
+                                                                        @RequestParam("timestamp") Timestamp ts){
+        BaseResultDTO result = timesheetService.optimizedTaskAssignmentForUser(userName, ts);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
-    //test
     @CrossOrigin
-    @RequestMapping(value = "/timesheet/transferSubTasksOfOldUser",method = RequestMethod.PUT)
-    public ResponseEntity<BaseResultDTO> transferSubTasksOfUser(@RequestParam("projectId") Long id,
-                                                                              @RequestParam("name") String name,
-                                                                              @RequestParam("timestamp") Timestamp ts){
-        BaseResultDTO result = timesheetService.transferSubTasksOfUser(id, name, ts);
+    @RequestMapping(value = "/timesheet/confirmUserTaskForMonth",method = RequestMethod.PUT)
+    public ResponseEntity<BaseResultDTO> confirmUserTaskForMonth(@RequestParam("user") String userName,
+                                                                 @RequestParam("timestamp") Timestamp ts,
+                                                                 @RequestParam("status") int status,
+                                                                 @RequestParam("curStatus") int curStatus){
+        BaseResultDTO result = timesheetService.confirmUserTaskForMonth(userName, ts, status, curStatus);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
@@ -151,5 +135,13 @@ public class TimesheetController extends BaseRest {
                                                                 @RequestParam("timestamp") Timestamp ts){
         BaseResultDTO result = timesheetService.transferTasksOfUser(id, name, ts);
         return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @RequestMapping("/timesheet/listByProjectId")
+    public ResponseEntity<BaseResultDTO> findAllByProjectId(@RequestParam("pageSize") Integer pageSize,
+                                                 @RequestParam("page") Integer page){
+        BaseResultDTO result = timesheetService.findAll(pageSize, page);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

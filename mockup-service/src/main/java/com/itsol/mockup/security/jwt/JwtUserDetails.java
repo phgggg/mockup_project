@@ -10,12 +10,12 @@ import java.util.List;
  * @author Rin-DTS
  */
 public class JwtUserDetails implements UserDetails {
-    private String username;
-    private String token;
+    private final String username;
+    private final String token;
     private String email;
     private String phone;
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public JwtUserDetails(String username, String password, String token, List<GrantedAuthority> grantedAuthorities) {
         this.username = username;

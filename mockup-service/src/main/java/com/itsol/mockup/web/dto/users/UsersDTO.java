@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itsol.mockup.entity.RoleEntity;
 import com.itsol.mockup.entity.TeamEntity;
 import com.itsol.mockup.entity.TimeSheetEntity;
+import com.itsol.mockup.web.dto.role.RoleDTO;
+import com.itsol.mockup.web.dto.team.TeamDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,11 +34,12 @@ public class UsersDTO {
     private String reason;
     private Integer imageId;
     private Integer levelId;
-
-    private List<RoleEntity> roles = new ArrayList<>();
-
-    private List<TeamEntity> teams = new ArrayList<>();
+//    @JsonIgnore
+    private List<RoleDTO> roles;
+    @JsonIgnore
+    private List<TeamDTO> teams;
     @JsonIgnore
     private List<TimeSheetEntity> timeSheets;
+
 
 }

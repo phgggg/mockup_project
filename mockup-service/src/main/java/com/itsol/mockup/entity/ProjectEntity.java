@@ -17,6 +17,7 @@ public class ProjectEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "project_seq")
     @SequenceGenerator(name = "project_seq", sequenceName = "project_seq", allocationSize = 1)
     private Long projectId;
+
     @Column(name = "PROJECT_NAME")
     private String projectName;
 
@@ -53,6 +54,6 @@ public class ProjectEntity {
     @OneToMany(mappedBy="projectEntity", fetch = FetchType.LAZY)
     private List<TeamEntity> teams;
 
-    @OneToMany(mappedBy="project", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy="projectFile", fetch = FetchType.LAZY)
     private List<FileEntity> files;
 }

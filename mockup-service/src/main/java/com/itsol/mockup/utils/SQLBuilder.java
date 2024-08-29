@@ -20,6 +20,7 @@ public class SQLBuilder {
     public static final String SQL_FILE_FROM_SUBTASK_MONTH = "from-subtask-month";
     public static final String SQL_FILE_SELECT_ESTIMATED_HOURS = "select-estimated_hours";
     public static final String SQL_FILE_SELECT_HOURS_SPENT = "select-hours_spent";
+    public static final String SQL_FILE_CONDITION_STATUS = "condition-status";
     public static String getSqlQueryById(String module,
                                          String queryId) {
         File folder = null;

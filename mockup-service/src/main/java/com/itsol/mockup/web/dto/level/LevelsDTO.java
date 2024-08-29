@@ -8,4 +8,5 @@ import lombok.Setter;
 public class LevelsDTO {
     private Long levelId;
     private String name;
+    private Long levelValue;
 }

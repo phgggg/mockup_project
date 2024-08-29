@@ -66,6 +66,15 @@ public class BaseService {
     protected SubTaskRepository subTaskRepository;
 
     @Autowired
+    protected LevelsRepository levelsRepository;
+
+    @Autowired
+    protected RiskRepository riskRepository;
+
+    @Autowired
+    protected RiskFromUserRepository riskFromUserRepository;
+
+    @Autowired
     protected TokenUtils tokenUtils;
 
     @Autowired
